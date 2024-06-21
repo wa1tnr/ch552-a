@@ -1,12 +1,15 @@
-/* include Arduino.h */
+/* test-aa.ino */
+/* Fri 21 Jun 17:05:42 UTC 2024 */
 
-void setup() {
-/*
-    USBSerial.begin(9600);
-    USBSerial.println("test");
-*/
+void waitUSB() {
+    while (!USBSerial()) {
+        ; // wait for serial port to connect.
+          // Needed for native USB port only
+    }
 }
 
-void loop() {
-}
+void setup() { USBSerial_println("ASCII Table ~ Character Map"); }
 
+void loop() {}
+
+// end.
