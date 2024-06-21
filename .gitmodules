@@ -1,0 +1,3 @@
+[submodule "ch55xduino"]
+	path = ch55xduino
+	url = https://github.com/DeqingSun/ch55xduino.git
