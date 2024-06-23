@@ -2,6 +2,23 @@
   Most Arduinos have an on-board LED you can control. On the simpleCH552
   it is attached to digital pin P3.3 */
 
+/* *******************************************************************
+   **********************                 ****************************
+   **********************   w a n t e d   ****************************
+   **********************                 ****************************
+   **********************                 ****************************
+   ******************************************************************* */
+
+/*
+ *    wanted:   wrappers.  Anything provided by the .ino
+ *              that does not 'work' in interpreter.c in an
+ *              obvious way.
+ *
+ *              Commented out, for example, all Serial.print()
+ *              uses.  A simple wrapper may solve that neatly.
+ *
+ */
+
 #define LED_BUILTIN 16
 
 void slowerE() {
