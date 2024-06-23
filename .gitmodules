@@ -1,3 +1,6 @@
 [submodule "ch55xduino"]
 	path = ch55xduino
 	url = https://github.com/DeqingSun/ch55xduino.git
+[submodule "src/interpret"]
+	path = src/interpret
+	url = https://github.com/CharleyShattuck/Feather-M0-interpreter.git
