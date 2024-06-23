@@ -1,29 +1,65 @@
-/* test-aa.ino */
-/* Fri 21 Jun 17:05:42 UTC 2024 */
+/* Blink
+  Most Arduinos have an on-board LED you can control. On the simpleCH552
+  it is attached to digital pin P3.3 */
 
-#define CS_PIN 14
+#define LED_BUILTIN 16
 
-void waitUSB() {
-    while (!USBSerial()) {
-        ; // wait for serial port to connect.
-          // Needed for native USB port only
-    }
+void slowerE() {
+  for (int p = 250; p > 0; p--) {
+    ;
+  }
 }
 
-void gpio_setup() {
 
-    /*
-     * upstream has dWrite before pinMode
-     * perhaps to avoid electrical issues
-     * that may arise if not done in this sequence.
-     */
-
-    digitalWrite(CS_PIN, HIGH);
-    pinMode(CS_PIN, OUTPUT);
+void slowerD() {
+  for (int p = 250; p > 0; p--) {
+    slowerE();
+  }
 }
 
-void setup() { USBSerial_println("ASCII Table ~ Character Map"); }
 
-void loop() {}
 
-// end.
+
+void slowerC() {
+  for (int p = 25; p > 0; p--) {
+    ;
+    /* slowerD(); */
+  }
+}
+
+
+void slowerB() {
+  for (int p = 200; p > 0; p--) {
+    slowerC();
+  }
+}
+
+
+void slower() {
+  for (int p = 200; p > 0; p--) {
+    slowerB();
+  }
+}
+
+
+void setup() {
+  delay(2000);
+  for (int index = 225; index >0; index--) {
+    USBSerial_print("ardcli I am 8051 defgh.. ");
+    USBSerial_println(index);
+    USBSerial_flush();
+    slower();
+  }
+
+  pinMode(LED_BUILTIN, OUTPUT);
+
+}
+
+void loop() {
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(1000);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1000);
+}
+
+/* end */
