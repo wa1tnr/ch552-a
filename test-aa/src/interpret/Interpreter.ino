@@ -1,3 +1,9 @@
+
+
+#define LED_BUILTIN 33
+const int ledPin =  LED_BUILTIN;// the number of the LED pin
+
+
 /* Tiny interpreter,
    similar to myforth's Standalone Interpreter
    This example code is in the public domain */
@@ -15,7 +21,10 @@ typedef struct {
    Number of items must be a power of 2 */
 const int STKSIZE = 8;
 const int STKMASK = 7;
-int stack[STKSIZE];
+/* int stack[STKSIZE]; */
+/* compiler did not like this above */
+/* instead: */
+int stack[8]; /* try my product video professor */
 int p = 0;
 
 /* TOS is Top Of Stack */
@@ -24,11 +33,17 @@ int p = 0;
 #define NAMED(x, y) const char x[]=y
 
 /* Terminal Input Buffer for interpreter */
-const byte maxtib = 16;
-char tib[maxtib];
+/* const byte maxtib = 16; */ /* compiler complains */
+
+const int maxtib = 16;
+
+char tib[16]; /* compiler said no .. so coding it firmly */
+
 /* buffer required for strings read from flash */
-char namebuf[maxtib];
-byte pos;
+/* char namebuf[maxtib]; */
+char namebuf[16];
+/* byte pos; */
+int pos;
 
 /* push n to top of data stack */
 void push(int n) {
@@ -135,15 +150,15 @@ void negate() {
 /* destructively display top of stack, decimal */
 NAMED(_dot, ".");
 void dot() {
-  Serial.print(pop());
-  Serial.print(" ");
+  /* Serial.print(pop()); */
+  /* Serial.print(" "); */
 }
 
 /* destructively display top of stack, hex */
 NAMED(_dotHEX, ".h");
 void dotHEX() {
-  Serial.print(0xffff & pop(), HEX);
-  Serial.print(" ");
+  /* Serial.print(0xffff & pop(), HEX); */
+  /* Serial.print(" "); */
 }
 
 /* display whole stack, hex */
@@ -161,79 +176,79 @@ void dotS() {
 /* delay TOS # of milliseconds */
 NAMED(_delay, "delay");
 void del() {
-  delay(pop());
+  /* delay(pop()); */
 }
 
 /* Toggle pin at TOS and delay(spd), repeat... */
 NAMED(_wiggle, "wiggle");
 void wiggle() {
   int a = pop();
-  pinMode(a, OUTPUT);
+  /* pinMode(a, OUTPUT); */
   for (int i = 0; i < 20; i++) {
-    digitalWrite(a, HIGH);
-    delay(100);
-    digitalWrite(a, LOW);
-    delay(100);
+    /* digitalWrite(a, HIGH); */
+    /* delay(100); */
+    /* digitalWrite(a, LOW); */
+    /* delay(100); */
   }
 }
 
 /* TOS is pin number, set it HIGH */
 NAMED(_high, "high");
 void high() {
-  digitalWrite(pop(), HIGH);
+  /* digitalWrite(pop(), HIGH); */
 }
 
 /* set TOS pin LOW */
 NAMED(_low, "low");
 void low() {
-  digitalWrite(pop(), LOW);
+  /* digitalWrite(pop(), LOW); */
 }
 
 /* read TOS pin */
 NAMED(_in, "in");
 void in() {
-  TOS = digitalRead(TOS);
+  /* TOS = digitalRead(TOS); */
 }
 
 /* make TOS pin an input */
 NAMED(_input, "input");
 void input() {
-  pinMode(pop(), INPUT);
+  /* pinMode(pop(), INPUT); */
 }
 
 /* make TOS pin an output */
 NAMED(_output, "output");
 void output() {
-  pinMode(pop(), OUTPUT);
+  /* pinMode(pop(), OUTPUT); */
 }
 
 /* make TOS pin an input with weak pullup */
 NAMED(_input_pullup, "input_pullup");
 void input_pullup() {
-  pinMode(pop(), INPUT_PULLUP);
+  /* pinMode(pop(), INPUT_PULLUP); */
 }
 
 /* dump 16 bytes of RAM in hex with ascii on the side */
 void dumpRAM() {
   char buffer[5] = "";
-  char *ram;
+  /* char *ram; */
   int p = pop();
-  ram = (char*)p;
-  sprintf(buffer, "%4x", p);
-  Serial.print(buffer);
-  Serial.print("   ");
+  /* ram = (char*)p; */
+  /* sprintf(buffer, "%4x", p); */
+  /* Serial.print(buffer); */
+  /* Serial.print("   "); */
   for (int i = 0; i < 16; i++) {
-    char c = *ram++;
-    sprintf(buffer, " %2x", (c & 0xff));
-    Serial.print(buffer);
+    /* char c = *ram++; */
+    /* sprintf(buffer, " %2x", (c & 0xff)); */
+    /* Serial.print(buffer); */
   }
-  ram = (char*)p;
-  Serial.print("   ");
+  /* ram = (char*)p; */
+  /* Serial.print("   "); */
   for (int i = 0; i < 16; i++) {
-    buffer[0] = *ram++;
-    if (buffer[0] > 0x7f || buffer[0] < ' ') buffer[0] = '.';
-    buffer[1] = '\0';
-    Serial.print(buffer);
+    /* buffer[0] = *ram++; */
+    /* if (buffer[0] > 0x7f || buffer[0] < ' ') buffer[0] = '.'; */
+    /* buffer[1] = '\0'; */
+    /* Serial.print(buffer); */
   }
   push(p + 16);
 }
@@ -242,7 +257,7 @@ void dumpRAM() {
 NAMED(_dumpr, "dump");
 void rdumps() {
   for (int i = 0; i < 16; i++) {
-    Serial.println();
+    /* Serial.println(); */
     dumpRAM();
   }
 }
@@ -303,46 +318,47 @@ const int entries = sizeof dictionary / sizeof dictionary[0];
 /* Display all words in dictionary */
 void words() {
   for (int i = entries - 1; i >= 0; i--) {
-    strcpy(namebuf, dictionary[i].name);
-    Serial.print(namebuf);
-    Serial.print(" ");
+    /* strcpy(namebuf, dictionary[i].name); */
+    /* Serial.print(namebuf); */
+    /* Serial.print(" "); */
   }
 }
 
 /* Find a word in the dictionary, returning its position */
 int locate() {
   for (int i = entries; i >= 0; i--) {
-    strcpy(namebuf, dictionary[i].name);
-    if (!strcmp(tib, namebuf)) return i;
+    /* strcpy(namebuf, dictionary[i].name); */
+    /* if (!strcmp(tib, namebuf)) return i; */
   }
   return 0;
 }
 
 /* Is the word in tib a number? */
 int isNumber() {
-  char *endptr;
-  strtol(tib, &endptr, 0);
-  if (endptr == tib) return 0;
-  if (*endptr != '\0') return 0;
+  /* char *endptr; */
+  /* strtol(tib, &endptr, 0); */
+  /* if (endptr == tib) return 0; */
+  /* if (*endptr != '\0') return 0; */
   return 1;
 }
 
 /* Convert number in tib */
 int number() {
-  char *endptr;
-  return (int) strtol(tib, &endptr, 0);
+  /* char *endptr; */
+  /* return (int) strtol(tib, &endptr, 0); */
 }
 
 char ch;
 
 void ok() {
-  if (ch == '\r') Serial.println("ok");
+  if (ch == '\r') return; /* NO RETURN it is this instead: Serial.println("ok"); */
 }
 
 /* Incrementally read command line from serial port */
-byte reading() {
-  if (!Serial.available()) return 1;
-  ch = Serial.read();
+/* byte reading() { */
+int reading() {
+  /* if (!Serial.available()) return 1; */
+  ch = 'a'; /* no constant it is this instead: Serial.read(); */
   if (ch == '\n') return 1;
   if (ch == '\r') return 0;
   if (ch == ' ') return 0;
@@ -359,8 +375,8 @@ void readword() {
   pos = 0;
   tib[0] = 0;
   while (reading());
-  Serial.print(tib);
-  Serial.print(" ");
+  /* Serial.print(tib); */
+  /* Serial.print(" "); */
 }
 
 /* Run a word via its name */
@@ -376,20 +392,23 @@ void runword() {
     ok();
     return;
   }
-  Serial.println("?");
+  /* Serial.println("?"); */
 }
 
 /* Arduino main loop */
 
-void setup() {
-  Serial.begin(9600);
-  while (!Serial);
-  Serial.println ("Forth-like interpreter:");
+void setupInterpreter() {
+  /* Serial.begin(9600); */
+  /* while (!Serial); */
+  /* Serial.println ("Forth-like interpreter:"); */
   words();
-  Serial.println();
+  /* Serial.println(); */
 }
 
-void loop() {
+void Interpreter() {
   readword();
   runword();
 }
+
+/* Sun 23 Jun 11:30:54 UTC 2024 */
+/* Sun 23 Jun 12:31:20 UTC 2024 */
