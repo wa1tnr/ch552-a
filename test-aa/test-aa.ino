@@ -21,6 +21,18 @@
 
 #define LED_BUILTIN 16
 
+char __data buffer[64];
+
+void putLine(char *buffer) {
+  /* USBSerial_print(buffer); */
+  /* USBSerial_print("frank in sense"); */
+  /* USBSerial_print(*buffer); */
+}
+
+void testPutLine() {
+  /* snprintf(buffer, sizeof buffer, "%s", "abcde"); */
+}
+
 void slowerE() {
   for (int p = 250; p > 0; p--) {
     ;
@@ -63,6 +75,8 @@ extern void Interpreter();
 
 void setup() {
   delay(2000);
+  testPutLine();
+
   setupInterpreter();
   for (;;) { Interpreter(); }
   for (int index = 225; index >0; index--) {
