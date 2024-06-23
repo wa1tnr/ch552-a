@@ -41,9 +41,13 @@ void slower() {
   }
 }
 
+extern void setupInterpreter();
+extern void Interpreter();
 
 void setup() {
   delay(2000);
+  setupInterpreter();
+  for (;;) { Interpreter(); }
   for (int index = 225; index >0; index--) {
     USBSerial_print("ardcli I am 8051 defgh.. ");
     USBSerial_println(index);
