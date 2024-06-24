@@ -1,3 +1,6 @@
 [submodule "ch55xduino"]
 	path = ch55xduino
 	url = https://github.com/DeqingSun/ch55xduino.git
+[submodule "raspberrypi-pico"]
+	path = raspberrypi-pico
+	url = https://github.com/marin9/raspberrypi-pico.git

@@ -6,6 +6,20 @@ Arduino IDE (sort-of).
 
 Primarily for the C programming Language.
 
+#### Sun 23 Jun 13:21:55 UTC 2024
+
+ * imported shattuck's forth like interpreter code
+   initially with a git submodule
+
+ * modded it severely for clean compile non-functioning
+
+ * omitted both submodule dependencies but kept the
+   compiler toolchain submodule available here
+
+   REPEAT: no `'git submodule update --init'` used at all,
+   except *electively* for detailed *informational*
+   purposes.  Nothing there is compiled-against.
+
 #### Sun 23 Jun 09:48:49 UTC 2024
 ##### update: success
 
