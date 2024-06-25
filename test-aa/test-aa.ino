@@ -86,6 +86,46 @@ fzf
 }
 */
 
+/*
+ *  refs
+ *    Stefan Wagner
+ *    https://easyeda.com/wagiminator
+ *    using:  http://creativecommons.org/licenses/by-sa/3.0/
+ *    for:
+ *      https://github.com/wagiminator/CH552-USB-OLED/blob/main/software/cdc_oled_terminal/src/oled_term.c#L161-L197
+ *    Thank you.
+ */
+
+void OLED_write(char c) {
+  c = c & 0x7F;                           // ignore top bit
+  if(c > 254) return;
+
+  if(
+      (c > 31) ||
+      (c == '\r') ||
+      (c == '\n') ||
+      (c == '\010')
+    ) {
+    USBSerial_write(c);
+  }
+}
+
+// OLED print string
+void OLED_print(char* str) {
+  while(*str) OLED_write(*str++);
+}
+
+// OLED print string with newline
+void OLED_println(char* str) {
+  OLED_print(str);
+  OLED_write('\n');
+  // OLED_write('\n');
+}
+
+// void OLED_write(char c);        // OLED write a character or handle control characters
+// void OLED_print(char* str);     // OLED print string
+// void OLED_println(char* str);   // OLED print string with newline
+
 
 void slowerE() {
   for (int p = 250; p > 0; p--) {
@@ -124,19 +164,18 @@ void slower() {
   }
 }
 
-extern void setupInterpreter();
-extern void Interpreter();
+// extern void setupInterpreter();
+// extern void Interpreter();
 
 void setup() {
   delay(2000);
   /* testPutLine(); */
 
-  setupInterpreter();
-  for (;;) { Interpreter(); }
+  // setupInterpreter();
+  // for (;;) { Interpreter(); }
   for (int index = 225; index >0; index--) {
-    USBSerial_print("ardcli I am 8051 defgh.. ");
-    USBSerial_println(index);
-    USBSerial_flush();
+    OLED_println("darfour in elgabulo 8051 noxvvpj.. ");
+    OLED_println("Tue 25 Jun 03:14:23 UTC 2024");
     slower();
   }
 
