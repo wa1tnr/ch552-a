@@ -1,7 +1,7 @@
 #!/bin/sh
 # Fri 21 Jun 16:52:18 UTC 2024
 
-export LOCAL_ACLI_DIRECTOR_Y_PROJ_ECT="./test-aa"
+export LOCAL_ACLI_DIRECTOR_Y_PROJ_ECT="./sketch_jun25a"
 
 prequel_a() {
     echo
