@@ -96,7 +96,7 @@ fzf
  *    Thank you.
  */
 
-void OLED_write(char c) {
+void serUSB_write(char c) {
   c = c & 0x7F;                           // ignore top bit
   if(c > 254) return;
 
@@ -110,21 +110,21 @@ void OLED_write(char c) {
   }
 }
 
-// OLED print string
-void OLED_print(char* str) {
-  while(*str) OLED_write(*str++);
+// serUSB print string
+void serUSB_print(char* str) {
+  while(*str) serUSB_write(*str++);
 }
 
-// OLED print string with newline
-void OLED_println(char* str) {
-  OLED_print(str);
-  OLED_write('\n');
-  // OLED_write('\n');
+// serUSB print string with newline
+void serUSB_println(char* str) {
+  serUSB_print(str);
+  serUSB_write('\n');
+  // serUSB_write('\n');
 }
 
-// void OLED_write(char c);        // OLED write a character or handle control characters
-// void OLED_print(char* str);     // OLED print string
-// void OLED_println(char* str);   // OLED print string with newline
+// void serUSB_write(char c);        // serUSB write a character or handle control characters
+// void serUSB_print(char* str);     // serUSB print string
+// void serUSB_println(char* str);   // serUSB print string with newline
 
 
 void slowerE() {
@@ -174,8 +174,8 @@ void setup() {
   // setupInterpreter();
   // for (;;) { Interpreter(); }
   for (int index = 225; index >0; index--) {
-    OLED_println("darfour in elgabulo 8051 noxvvpj.. ");
-    OLED_println("Tue 25 Jun 03:14:23 UTC 2024");
+    serUSB_println("darfour in elgabulo 8051 noxvvpj.. ");
+    serUSB_println("Tue 25 Jun 03:14:23 UTC 2024");
     slower();
   }
 
