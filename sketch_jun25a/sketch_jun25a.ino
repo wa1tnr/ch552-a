@@ -3,11 +3,11 @@
   it is attached to digital pin P3.3 */
 
 /* *******************************************************************
-   **********************                 ****************************
-   **********************   w a n t e d   ****************************
-   **********************                 ****************************
-   **********************                 ****************************
-   ******************************************************************* */
+ **********************                 ****************************
+ **********************   w a n t e d   ****************************
+ **********************                 ****************************
+ **********************                 ****************************
+ ******************************************************************* */
 
 /*
  *    wanted:   wrappers.  Anything provided by the .ino
@@ -26,10 +26,11 @@
 /* char *__data bufPtr; */
 /* char *__data */
 
-
 /*
 
-  [ https://stackoverflow.com/questions/63003227/vscode-not-able-to-resue-env-variables-set-inside-terminal-integrated-env-wind ]
+  [
+https://stackoverflow.com/questions/63003227/vscode-not-able-to-resue-env-variables-set-inside-terminal-integrated-env-wind
+]
 
 In your user settings (File > Preferences > Settings), add the following:
 
@@ -45,42 +46,40 @@ fzf
 
 /* USBSerial_println(buffer); */
 
-
-  /* USBSerial_print(buffer); */
-  /* USBSerial_print("frank in sense"); */
-  /* USBSerial_print(*buffer); */
-
+/* USBSerial_print(buffer); */
+/* USBSerial_print("frank in sense"); */
+/* USBSerial_print(*buffer); */
 
 /* void testPutLine() { */
-  /*
-      GOOD: bufPtr = * buffer;
-            bufPtr = buffer;
-            {
-            bufPtr = (char *__data) buffer;
-            USBSerial_println(buffer);
-            }
-  */
+/*
+    GOOD: bufPtr = * buffer;
+          bufPtr = buffer;
+          {
+          bufPtr = (char *__data) buffer;
+          USBSerial_println(buffer);
+          }
+*/
 
-  /*
-      BAD: bufPtr = & buffer;
-            {
-            bufPtr = (char *__data) buffer;
-            USBSerial_println(bufPtr);
-            }
-  */
+/*
+    BAD: bufPtr = & buffer;
+          {
+          bufPtr = (char *__data) buffer;
+          USBSerial_println(bufPtr);
+          }
+*/
 
 /*
   bufPtr = (char *__data) buffer;
 */
-  /* compiles clean but cannot find how to use it here for this task */
+/* compiles clean but cannot find how to use it here for this task */
 
 /*
   USBSerial_println(buffer);
   */
 
-  /* USBSerial_println(buffer); */
-  /* USBSerial_println(bufPtr); */
-  /* snprintf(buffer, sizeof buffer, "%s", "abcde"); */
+/* USBSerial_println(buffer); */
+/* USBSerial_println(bufPtr); */
+/* snprintf(buffer, sizeof buffer, "%s", "abcde"); */
 
 /*
 }
@@ -96,98 +95,104 @@ fzf
  *    Thank you.
  */
 
-void serUSB_write(char c) {
-  c = c & 0x7F;                           // ignore top bit
-  if(c > 254) return;
+void flushing_ny() {
+    USBSerial_flush();
+}
 
-  if(
-      (c > 31) ||
-      (c == '\r') ||
-      (c == '\n') ||
-      (c == '\010')
-    ) {
-    USBSerial_write(c);
-  }
+void serUSB_write(char c) {
+    c = c & 0x7F; // ignore top bit
+    if (c > 254)
+        return;
+
+    if ((c > 31) || (c == '\r') || (c == '\n') || (c == '\010')) {
+        USBSerial_write(c);
+    }
 }
 
 // serUSB print string
-void serUSB_print(char* str) {
-  while(*str) serUSB_write(*str++);
+void serUSB_print(char *str) {
+    while (*str)
+        serUSB_write(*str++);
 }
 
 // serUSB print string with newline
-void serUSB_println(char* str) {
-  serUSB_print(str);
-  serUSB_write('\n');
-  // serUSB_write('\n');
+void serUSB_println(char *str) {
+    serUSB_print(str);
+    serUSB_write('\n');
+    // serUSB_write('\n');
 }
 
-// void serUSB_write(char c);        // serUSB write a character or handle control characters
-// void serUSB_print(char* str);     // serUSB print string
+// void serUSB_write(char c);        // serUSB write a character or handle
+// control characters void serUSB_print(char* str);     // serUSB print string
 // void serUSB_println(char* str);   // serUSB print string with newline
 
-
 void slowerE() {
-  for (int p = 250; p > 0; p--) {
-    ;
-  }
+    for (int p = 250; p > 0; p--) {
+        ;
+    }
 }
-
 
 void slowerD() {
-  for (int p = 250; p > 0; p--) {
-    slowerE();
-  }
+    for (int p = 250; p > 0; p--) {
+        slowerE();
+    }
 }
-
-
-
 
 void slowerC() {
-  for (int p = 25; p > 0; p--) {
-    ;
-    /* slowerD(); */
-  }
+    for (int p = 25; p > 0; p--) {
+        ;
+        /* slowerD(); */
+    }
 }
-
 
 void slowerB() {
-  for (int p = 200; p > 0; p--) {
-    slowerC();
-  }
+    for (int p = 200; p > 0; p--) {
+        slowerC();
+    }
 }
 
-
 void slower() {
-  for (int p = 200; p > 0; p--) {
-    slowerB();
-  }
+    for (int p = 200; p > 0; p--) {
+        slowerB();
+    }
 }
 
 // extern void setupInterpreter();
 // extern void Interpreter();
 
 void setup() {
-  delay(2000);
-  /* testPutLine(); */
+    delay(2000);
+    /* testPutLine(); */
 
-  // setupInterpreter();
-  // for (;;) { Interpreter(); }
-  for (int index = 225; index >0; index--) {
-    serUSB_println("darfour in elgabulo 8051 noxvvpj.. ");
-    serUSB_println("Tue 25 Jun 03:14:23 UTC 2024");
-    slower();
-  }
+    // setupInterpreter();
+    // for (;;) { Interpreter(); }
+    for (int index = 225; index > 0; index--) {
+        int count = index;
+        serUSB_println("darmok and gilad at tenagra in statis 8051 pbrsgng.. ");
 
-  pinMode(LED_BUILTIN, OUTPUT);
+        serUSB_println("");
 
+        USBSerial_print(count);
+
+        serUSB_println("");
+
+        serUSB_println(" * * * * * * * * * * * * *");
+        serUSB_println(" * * *   s t a t e   * * *");
+        serUSB_println(" * * * * * * * * * * * * *");
+
+        serUSB_println("Tue 25 Jun 22:16:53 UTC 2024");
+        flushing_ny();
+        slower();
+    }
+
+    pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(1000);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(1000);
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(1000);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(1000);
 }
 
 /* end */
