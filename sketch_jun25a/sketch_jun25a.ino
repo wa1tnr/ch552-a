@@ -95,7 +95,13 @@ fzf
  *    Thank you.
  */
 
-void flushing_ny() {
+// void flushing_ny() {
+
+void ard_delay(int ms) {
+    delay(ms);
+}
+
+void serUSB_flush() {
     USBSerial_flush();
 }
 
@@ -188,7 +194,8 @@ void print_cool_things(int count) {
         serUSB_println(" * * *    Wed 26 Jun 13:36:21 UTC 2024   * * *");
         msg_starframed();
         msg_longstars();
-        flushing_ny();
+        /* flushing_ny(); */
+        serUSB_flush();
         slower();
 }
 
@@ -214,6 +221,7 @@ void setup() {
     USBSerial_println(" running setupInterpreter below:");
     delay(1000);
     setupInterpreter();
+    delay(8000);
     do_cool_things();
 }
 

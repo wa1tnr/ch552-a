@@ -7,6 +7,8 @@ extern void serUSB_write(char c);
 extern void serUSB_print_hex(char c);
 extern void serUSB_print(char *str);
 extern void serUSB_println(char *str);
+extern void serUSB_flush();
+extern void ard_delay(int ms);
 
 /* Tiny interpreter,
    similar to myforth's Standalone Interpreter
@@ -231,26 +233,37 @@ void dumpRAM() {
   char buffer[5] = "";
   char *ram;
   int p = pop();
-  serUSB_println("");
   serUSB_print(" p: ");
   ram = (char*)p;
+
+  if (p < 0x10) {
+    serUSB_print("0"); // pad print with leading zero
+  }
+
+  if (p > 0xFF) {
+    serUSB_print("!");
+  }
+
   serUSB_print_hex(p);
+
   serUSB_write(':');
   serUSB_write(' ');
   /* sprintf(buffer, "%4x", p); */
   /* Serial.print(buffer); */
   serUSB_print("   ");
 
+  /* individual hex 2-digit groups l to r */
   for (uint8_t i = 0; i < 16; i++) {
     char c = *ram++;
     c = c & 0xff;
+    if (c < 0x10) { // initially tested for c == 0 now want all single digit hex vals
+        serUSB_print("0"); // pad print with leading zero
+    }
     serUSB_print_hex(c);
     serUSB_write(' ');
-    /* sprintf(buffer, " %2x", (c & 0xff)); */
-    /* Serial.print(buffer); */
   }
   ram = (char*)p;
-  /* Serial.print("   "); */
+  serUSB_print("   ");
   for (uint8_t i = 0; i < 16; i++) {
     buffer[0] = *ram++;
     if (buffer[0] > 0x7f || buffer[0] < ' ') buffer[0] = '.';
@@ -264,9 +277,10 @@ void dumpRAM() {
 NAMED(_dumpr, "dump");
 void rdumps() {
   for (uint8_t i = 0; i < 16; i++) {
-    /* Serial.println(); */
+    serUSB_println("");
     dumpRAM();
   }
+  serUSB_println("");
 }
 
 /* End of Forth interpreter words */
@@ -414,7 +428,20 @@ void setupInterpreter() {
   serUSB_println ("");
   push(1200);
   rdumps();
-  serUSB_println (" expected an rdumps just above this line.");
+  serUSB_flush();
+  ard_delay(4000);
+  rdumps();
+  serUSB_flush();
+  ard_delay(4000);
+  rdumps();
+  serUSB_flush();
+  ard_delay(4000);
+  rdumps();
+  serUSB_flush();
+  ard_delay(4000);
+  rdumps();
+  serUSB_flush();
+  ard_delay(4000);
 }
 
 void Interpreter() {
