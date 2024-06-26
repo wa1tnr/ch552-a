@@ -160,39 +160,55 @@ void slower() {
 // extern void setupInterpreter();
 // extern void Interpreter();
 
-void setup() {
-    delay(2000);
-    /* testPutLine(); */
+void msg_longstars() {
+    serUSB_println(" * * * * * * * * * * * * * * * * * * * * * * *");
+}
 
-    // setupInterpreter();
-    // for (;;) { Interpreter(); }
-    for (int index = 225; index > 0; index--) {
-        int count = index;
+void msg_starframed() {
+    serUSB_println(" * * *                                   * * *");
+}
+
+
+void print_cool_things(int count) {
         serUSB_println("darmok and gilad at tenagra in statis 8051 pbrsgng.. ");
-
         serUSB_println("");
-
         USBSerial_print(count);
-
         serUSB_println("");
-
-        serUSB_println(" * * * * * * * * * * * * *");
-        serUSB_println(" * * *   s t a t e   * * *");
-        serUSB_println(" * * * * * * * * * * * * *");
-
-        serUSB_println("Wed 26 Jun 03:02:25 UTC 2024");
+        msg_longstars();
+        msg_starframed();
+        serUSB_println(" * * *            s t a t e              * * *");
+        msg_starframed();
+        serUSB_println(" * * *        jelly roll morton          * * *");
+        msg_starframed();
+        serUSB_println(" * * *    Wed 26 Jun 13:36:21 UTC 2024   * * *");
+        msg_starframed();
+        msg_longstars();
         flushing_ny();
         slower();
-    }
+}
 
+void do_cool_things() {
+    for (int index = 225; index > 0; index--) {
+        int count = index;
+        print_cool_things(count);
+    }
     pinMode(LED_BUILTIN, OUTPUT);
 }
 
-void loop() {
+void dutyBlink() {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(1000);
     digitalWrite(LED_BUILTIN, LOW);
     delay(1000);
+}
+
+void setup() {
+    delay(2000);
+    do_cool_things();
+}
+
+void loop() {
+    dutyBlink();
 }
 
 /* end */
