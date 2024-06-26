@@ -99,6 +99,11 @@ void flushing_ny() {
     USBSerial_flush();
 }
 
+void serUSB_print_hex(char c) {
+    if(c > 255) return;
+    USBSerial_print(c, HEX);
+}
+
 void serUSB_write(char c) {
     c = c & 0x7F; // ignore top bit
     if (c > 254)
@@ -205,7 +210,9 @@ void dutyBlink() {
 extern void setupInterpreter();
 
 void setup() {
-    delay(2000);
+    delay(4000);
+    USBSerial_println(" running setupInterpreter below:");
+    delay(1000);
     setupInterpreter();
     do_cool_things();
 }

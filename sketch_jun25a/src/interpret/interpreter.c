@@ -3,6 +3,11 @@
 #define LED_BUILTIN 33
 const int ledPin =  LED_BUILTIN;// the number of the LED pin
 
+extern void serUSB_write(char c);
+extern void serUSB_print_hex(char c);
+extern void serUSB_print(char *str);
+extern void serUSB_println(char *str);
+
 /* Tiny interpreter,
    similar to myforth's Standalone Interpreter
    This example code is in the public domain */
@@ -226,12 +231,21 @@ void dumpRAM() {
   char buffer[5] = "";
   char *ram;
   int p = pop();
+  serUSB_println("");
+  serUSB_print(" p: ");
   ram = (char*)p;
+  serUSB_print_hex(p);
+  serUSB_write(':');
+  serUSB_write(' ');
   /* sprintf(buffer, "%4x", p); */
   /* Serial.print(buffer); */
-  /* Serial.print("   "); */
+  serUSB_print("   ");
+
   for (uint8_t i = 0; i < 16; i++) {
     char c = *ram++;
+    c = c & 0xff;
+    serUSB_print_hex(c);
+    serUSB_write(' ');
     /* sprintf(buffer, " %2x", (c & 0xff)); */
     /* Serial.print(buffer); */
   }
@@ -241,7 +255,7 @@ void dumpRAM() {
     buffer[0] = *ram++;
     if (buffer[0] > 0x7f || buffer[0] < ' ') buffer[0] = '.';
     buffer[1] = '\0';
-    /* Serial.print(buffer); */
+    serUSB_print(buffer);
   }
   push(p + 16);
 }
@@ -390,16 +404,17 @@ void runword() {
 
 /* Arduino main loop */
 
-extern void serUSB_write(char c);
-extern void serUSB_print(char *str);
-extern void serUSB_println(char *str);
-
 void setupInterpreter() {
   char c = 'b';
+  serUSB_write(c);
+  c = ' ';
   serUSB_write(c);
   serUSB_println ("Forth-like interpreter:");
   words();
   serUSB_println ("");
+  push(1200);
+  rdumps();
+  serUSB_println (" expected an rdumps just above this line.");
 }
 
 void Interpreter() {
