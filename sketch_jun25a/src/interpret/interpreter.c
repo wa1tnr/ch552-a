@@ -46,7 +46,7 @@ char namebuf[16];
 uint8_t pos;
 
 /* push n to top of data stack */
-void push(uint8_t n) {
+void push(int n) {
   p = (p + 1)& STKMASK;
   TOS = n;
 }
@@ -232,9 +232,15 @@ void input_pullup() {
 void dumpRAM() {
   char buffer[5] = "";
   char *ram;
-  int p = pop();
-  serUSB_print(" p: ");
-  ram = (char*)p;
+  __code int q = 0x7f;
+
+  __code int *pd = &q;
+//  serUSB_print(" p: ");
+  // ram = (char*)p;
+  // ram = p;
+
+  int p = (int) pd;
+  // int p = 0x7f;
 
   if (p < 0x10) {
     serUSB_print("0"); // pad print with leading zero
@@ -276,6 +282,17 @@ void dumpRAM() {
 /* dump 256 bytes of RAM */
 NAMED(_dumpr, "dump");
 void rdumps() {
+  int popped = pop();
+  serUSB_println("");
+  serUSB_flush();
+  serUSB_println("");
+  serUSB_flush();
+  serUSB_print("rdumps() popped = ");
+  serUSB_println(popped);
+  serUSB_flush();
+  serUSB_println("");
+  serUSB_flush();
+  push(popped);
   for (uint8_t i = 0; i < 16; i++) {
     serUSB_println("");
     dumpRAM();
@@ -426,10 +443,16 @@ void setupInterpreter() {
   serUSB_println ("Forth-like interpreter:");
   words();
   serUSB_println ("");
-  push(1200);
+  /* push(1200); */
+  __code int sample = 0x7F;
+  int* p;
+  p = & sample;
+  push(*p);
   rdumps();
   serUSB_flush();
-  ard_delay(4000);
+  serUSB_println("holding 24 sec");
+  serUSB_flush();
+  ard_delay(24000);
   rdumps();
   serUSB_flush();
   ard_delay(4000);
