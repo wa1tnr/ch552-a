@@ -157,13 +157,13 @@ void dotHEX() {
 /* display whole stack, hex */
 NAMED(_dotShex, ".sh");
 void dotShex() {
-  for (int i = 0; i < STKSIZE; i++) dotHEX();
+  for (uint8_t i = 0; i < STKSIZE; i++) dotHEX();
 }
 
 /* display whole stack, decimal */
 NAMED(_dotS, ".s");
 void dotS() {
-  for (int i = 0; i < STKSIZE; i++) dot();
+  for (uint8_t i = 0; i < STKSIZE; i++) dot();
 }
 
 /* delay TOS # of milliseconds */
@@ -175,9 +175,9 @@ void del() {
 /* Toggle pin at TOS and delay(spd), repeat... */
 NAMED(_wiggle, "wiggle");
 void wiggle() {
-  int a = pop();
+  uint8_t a = pop();
   /* pinMode(a, OUTPUT); */
-  for (int i = 0; i < 20; i++) {
+  for (uint8_t i = 0; i < 20; i++) {
     /* digitalWrite(a, HIGH); */
     /* delay(100); */
     /* digitalWrite(a, LOW); */
@@ -224,23 +224,23 @@ void input_pullup() {
 /* dump 16 bytes of RAM in hex with ascii on the side */
 void dumpRAM() {
   char buffer[5] = "";
-  /* char *ram; */
-  int p = pop();
-  /* ram = (char*)p; */
+  char *ram;
+  uint8_t p = pop();
+  ram = (char*)p;
   /* sprintf(buffer, "%4x", p); */
   /* Serial.print(buffer); */
   /* Serial.print("   "); */
-  for (int i = 0; i < 16; i++) {
-    /* char c = *ram++; */
+  for (uint8_t i = 0; i < 16; i++) {
+    char c = *ram++;
     /* sprintf(buffer, " %2x", (c & 0xff)); */
     /* Serial.print(buffer); */
   }
-  /* ram = (char*)p; */
+  ram = (char*)p;
   /* Serial.print("   "); */
-  for (int i = 0; i < 16; i++) {
-    /* buffer[0] = *ram++; */
-    /* if (buffer[0] > 0x7f || buffer[0] < ' ') buffer[0] = '.'; */
-    /* buffer[1] = '\0'; */
+  for (uint8_t i = 0; i < 16; i++) {
+    buffer[0] = *ram++;
+    if (buffer[0] > 0x7f || buffer[0] < ' ') buffer[0] = '.';
+    buffer[1] = '\0';
     /* Serial.print(buffer); */
   }
   push(p + 16);
@@ -249,7 +249,7 @@ void dumpRAM() {
 /* dump 256 bytes of RAM */
 NAMED(_dumpr, "dump");
 void rdumps() {
-  for (int i = 0; i < 16; i++) {
+  for (uint8_t i = 0; i < 16; i++) {
     /* Serial.println(); */
     dumpRAM();
   }
@@ -328,7 +328,7 @@ int locate() {
 
 /* Is the word in tib a number? */
 int isNumber() {
-  /* char *endptr; */
+  char *endptr;
   /* strtol(tib, &endptr, 0); */
   /* if (endptr == tib) return 0; */
   /* if (*endptr != '\0') return 0; */
@@ -337,7 +337,7 @@ int isNumber() {
 
 /* Convert number in tib */
 int number() {
-  /* char *endptr; */
+  char *endptr;
   /* return (int) strtol(tib, &endptr, 0); */
 }
 
@@ -349,7 +349,7 @@ void ok() {
 
 /* Incrementally read command line from serial port */
 /* byte reading() { */
-int reading() {
+uint8_t reading() {
   /* if (!Serial.available()) return 1; */
   ch = 'a'; /* no constant it is this instead: Serial.read(); */
   if (ch == '\n') return 1;
