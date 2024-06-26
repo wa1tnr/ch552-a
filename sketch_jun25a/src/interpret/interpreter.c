@@ -1,8 +1,7 @@
-
+#include <stdint.h>
 
 #define LED_BUILTIN 33
 const int ledPin =  LED_BUILTIN;// the number of the LED pin
-
 
 /* Tiny interpreter,
    similar to myforth's Standalone Interpreter
@@ -19,12 +18,9 @@ typedef struct {
    like a Green Arrays F18A data stack,
    so overflow and underflow are not possible
    Number of items must be a power of 2 */
-const int STKSIZE = 8;
-const int STKMASK = 7;
-/* int stack[STKSIZE]; */
-/* compiler did not like this above */
-/* instead: */
-int stack[8]; /* try my product video professor */
+const uint8_t STKSIZE = 8;
+const uint8_t STKMASK = 7;
+uint8_t stack[8];
 int p = 0;
 
 /* TOS is Top Of Stack */
@@ -35,18 +31,15 @@ int p = 0;
 /* Terminal Input Buffer for interpreter */
 /* const byte maxtib = 16; */ /* compiler complains */
 
-const int maxtib = 16;
-
-char tib[16]; /* compiler said no .. so coding it firmly */
+const uint8_t maxtib = 16;
+char tib[16];
 
 /* buffer required for strings read from flash */
-/* char namebuf[maxtib]; */
 char namebuf[16];
-/* byte pos; */
-int pos;
+uint8_t pos;
 
 /* push n to top of data stack */
-void push(int n) {
+void push(uint8_t n) {
   p = (p + 1)& STKMASK;
   TOS = n;
 }
@@ -59,7 +52,7 @@ int pop() {
 }
 
 /* Global delay timer */
-int spd = 15;
+uint8_t spd = 15;
 
 /* top of stack becomes current spd */
 NAMED(_speed, "speed");
@@ -76,7 +69,7 @@ void drop() {
 /* recover dropped stack item */
 NAMED(_back, "back");
 void back() {
-  for (int i = 1; i < STKSIZE; i++) drop();
+  for (uint8_t i = 1; i < STKSIZE; i++) drop();
 }
 
 /* copy top of stack */
@@ -88,8 +81,8 @@ void dup() {
 /* exchange top two stack items */
 NAMED(_swap, "swap");
 void swap() {
-  int a;
-  int b;
+  uint8_t a;
+  uint8_t b;
   a = pop();
   b = pop();
   push(a);
@@ -99,8 +92,8 @@ void swap() {
 /* copy second on stack to top */
 NAMED(_over, "over");
 void over() {
-  int a;
-  int b;
+  uint8_t a;
+  uint8_t b;
   a = pop();
   b = pop();
   push(b);
@@ -110,28 +103,28 @@ void over() {
 /* add top two items */
 NAMED(_add, "+");
 void add() {
-  int a = pop();
+  uint8_t a = pop();
   TOS = a + TOS;
 }
 
 /* bitwise and top two items */
 NAMED(_and, "and");
 void and_() {
-  int a = pop();
+  uint8_t a = pop();
   TOS = a & TOS;
 }
 
 /* inclusive or top two items */
 NAMED(_or, "or");
 void or_() {
-  int a = pop();
+  uint8_t a = pop();
   TOS = a | TOS;
 }
 
 /* exclusive or top two items */
 NAMED(_xor, "xor");
 void xor_() {
-  int a = pop();
+  uint8_t a = pop();
   TOS = a ^ TOS;
 }
 
