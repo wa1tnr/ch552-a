@@ -202,8 +202,11 @@ void dutyBlink() {
     delay(1000);
 }
 
+extern void setupInterpreter();
+
 void setup() {
     delay(2000);
+    setupInterpreter();
     do_cool_things();
 }
 

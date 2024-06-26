@@ -225,7 +225,7 @@ void input_pullup() {
 void dumpRAM() {
   char buffer[5] = "";
   char *ram;
-  uint8_t p = pop();
+  int p = pop();
   ram = (char*)p;
   /* sprintf(buffer, "%4x", p); */
   /* Serial.print(buffer); */
@@ -328,7 +328,7 @@ int locate() {
 
 /* Is the word in tib a number? */
 int isNumber() {
-  char *endptr;
+  /* char *endptr; */
   /* strtol(tib, &endptr, 0); */
   /* if (endptr == tib) return 0; */
   /* if (*endptr != '\0') return 0; */
@@ -337,7 +337,7 @@ int isNumber() {
 
 /* Convert number in tib */
 int number() {
-  char *endptr;
+  /* char *endptr; */
   /* return (int) strtol(tib, &endptr, 0); */
 }
 
@@ -390,12 +390,16 @@ void runword() {
 
 /* Arduino main loop */
 
+extern void serUSB_write(char c);
+extern void serUSB_print(char *str);
+extern void serUSB_println(char *str);
+
 void setupInterpreter() {
-  /* Serial.begin(9600); */
-  /* while (!Serial); */
-  /* Serial.println ("Forth-like interpreter:"); */
+  char c = 'b';
+  serUSB_write(c);
+  serUSB_println ("Forth-like interpreter:");
   words();
-  /* Serial.println(); */
+  serUSB_println ("");
 }
 
 void Interpreter() {
