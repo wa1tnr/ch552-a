@@ -296,7 +296,10 @@ void dumpRAM() {
 
     ard_delay(23);
 
-    int tested = (int)jaddr;
+    /* old int tested = (int)jaddr; */
+
+    /* trial 2210z */
+    int tested = (int)ram;
 
     if (tested > 0x3480) {
         serUSB_println("   may be a DANGER  ");
@@ -471,7 +474,8 @@ void setupInterpreter() {
     jaddr++;
     jaddr--;
 
-    for (int i = 32; i > 0; i--) {
+    // SAID 32 not 48 < 2214z
+    for (int i = 48; i > 0; i--) {
         serUSB_flush();
         rdumps();
         serUSB_flush();
@@ -486,4 +490,4 @@ void Interpreter() {
 }
 
 /* Sun 23 Jun 11:30:54 UTC 2024 */
-/* Thu 27 Jun 21:46:22 UTC 2024 */
+/* Thu 27 Jun 22:18:40 UTC 2024 */

@@ -189,9 +189,13 @@ void print_cool_things(int count) {
     msg_starframed();
     serUSB_println(" * * *            s t a t e              * * *");
     msg_starframed();
-    serUSB_println(" * * *      forty nine twenty seven      * * *");
+    serUSB_println(" * * *    good zero alignment and no     * * *");
+    serUSB_println(" * * *    longer skips every other       * * *");
+    serUSB_println(" * * *    row - solid.                   * * *");
     msg_starframed();
-    serUSB_println(" * * *    Thu 27 Jun 15:19:15 UTC 2024   * * *");
+    serUSB_println(" * * *    eight ninety-two point four    * * *");
+    msg_starframed();
+    serUSB_println(" * * *    Thu 27 Jun 22:16:09 UTC 2024   * * *");
     msg_starframed();
     msg_longstars();
     /* flushing_ny(); */
