@@ -228,29 +228,39 @@ void input_pullup() {
   /* pinMode(pop(), INPUT_PULLUP); */
 }
 
+__code int j = 0x7e;
+
+int *jadr = &j;
+
 /* dump 16 bytes of RAM in hex with ascii on the side */
 void dumpRAM() {
-  char buffer[5] = "";
+
+
+  int jadrPrn = (int) jadr;
+
+  // serUSB_print(" jadrPrn: ");
+  // serUSB_println(jadrPrn);
+  // serUSB_flush();
+  serUSB_flush();
+
   char *ram;
-  __code int q = 0x7f;
+  ram = (char *) jadr;
 
-  __code int *pd = &q;
-//  serUSB_print(" p: ");
-  // ram = (char*)p;
-  // ram = p;
+  char buffer[5] = "";
 
-  int p = (int) pd;
-  // int p = 0x7f;
+  int pvr = (int) jadr;
 
-  if (p < 0x10) {
+  if (pvr < 0x10) {
     serUSB_print("0"); // pad print with leading zero
   }
 
-  if (p > 0xFF) {
+  if (pvr > 0xFF) {
     serUSB_print("!");
   }
 
-  serUSB_print_hex(p);
+  int address = (int) &ram;
+  // serUSB_print_hex(pvr);
+  serUSB_print(address);
 
   serUSB_write(':');
   serUSB_write(' ');
@@ -268,7 +278,8 @@ void dumpRAM() {
     serUSB_print_hex(c);
     serUSB_write(' ');
   }
-  ram = (char*)p;
+  /* ram = (char*)pvr; */
+  ram = (char *) jadr;
   serUSB_print("   ");
   for (uint8_t i = 0; i < 16; i++) {
     buffer[0] = *ram++;
@@ -276,29 +287,27 @@ void dumpRAM() {
     buffer[1] = '\0';
     serUSB_print(buffer);
   }
-  push(p + 16);
+  // push(pvr + 16);
+  jadr = jadr + 16;
 }
 
 /* dump 256 bytes of RAM */
 NAMED(_dumpr, "dump");
 void rdumps() {
-  int popped = pop();
-  serUSB_println("");
-  serUSB_flush();
-  serUSB_println("");
-  serUSB_flush();
-  serUSB_print("rdumps() popped = ");
-  serUSB_println(popped);
-  serUSB_flush();
-  serUSB_println("");
-  serUSB_flush();
-  push(popped);
+  // __code int q = 0x7f;
+  // __code int *pd = &q;
+  // int p = (int) pd;
+  // push(p);
+
   for (uint8_t i = 0; i < 16; i++) {
     serUSB_println("");
     dumpRAM();
   }
   serUSB_println("");
 }
+
+
+
 
 /* End of Forth interpreter words */
 /* ******************************************** */
@@ -436,6 +445,17 @@ void runword() {
 /* Arduino main loop */
 
 void setupInterpreter() {
+  ard_delay(4000);
+  serUSB_println("");
+  serUSB_println("");
+  serUSB_println("");
+  serUSB_println("seen: setupInterpreter();");
+  serUSB_println("");
+  serUSB_println("");
+  serUSB_println("");
+  serUSB_flush();
+  ard_delay(2000);
+ 
   char c = 'b';
   serUSB_write(c);
   c = ' ';
@@ -443,28 +463,31 @@ void setupInterpreter() {
   serUSB_println ("Forth-like interpreter:");
   words();
   serUSB_println ("");
+  serUSB_flush();
   /* push(1200); */
-  __code int sample = 0x7F;
-  int* p;
-  p = & sample;
-  push(*p);
-  rdumps();
-  serUSB_flush();
-  serUSB_println("holding 24 sec");
-  serUSB_flush();
-  ard_delay(24000);
-  rdumps();
-  serUSB_flush();
-  ard_delay(4000);
-  rdumps();
-  serUSB_flush();
-  ard_delay(4000);
-  rdumps();
-  serUSB_flush();
-  ard_delay(4000);
-  rdumps();
-  serUSB_flush();
-  ard_delay(4000);
+
+  // __code int sample = 0x7F;
+
+  // int* p;
+  // p = & sample;
+  // p = & sample;
+
+  // char rst = (char) &p;
+  // char rst = (char) p;
+
+  // serUSB_print(" p = & sample = ");
+
+  // serUSB_print_hex(rst);
+
+  // serUSB_println("");
+  // serUSB_flush();
+
+  for (int i = 8; i > 0; i--) {
+      serUSB_flush();
+      rdumps();
+      serUSB_flush();
+      ard_delay(4000);
+  }
 }
 
 void Interpreter() {
