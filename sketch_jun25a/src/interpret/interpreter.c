@@ -283,13 +283,24 @@ void dumpRAM() {
     buffer[1] = '\0';
     serUSB_print(buffer);
   }
-  /*
-  if (jadr < LIMIT) {
-  */
+
       jadr = jadr + 16;
-  /*
-  }
-  */
+      int tested = (int) jadr;
+      if (tested > 0x3FB0) {
+        serUSB_println("   may be a DANGER  ");
+        serUSB_flush();
+        serUSB_println("");
+        serUSB_flush();
+        serUSB_println("   see: interpreter.c  LINE 295");
+        serUSB_flush();
+        serUSB_println("");
+        serUSB_flush();
+        while(-1) {
+          ard_delay(2000);
+          serUSB_write('.');
+          serUSB_flush();
+        }
+      }
 }
 
 /* dump 256 bytes of RAM */
@@ -458,12 +469,26 @@ void setupInterpreter() {
 
   jadr++;
   jadr--;
+  jadr++;
+  jadr++;
+
+/*
+  for (int i = 73; i > 0; i--) {
+      jadr--;
+  }
+*/
+
+  for (int i = 48; i > 0; i--) {
+      jadr++;
+  }
+
 
   for (int i = 32; i > 0; i--) {
       serUSB_flush();
       rdumps();
       serUSB_flush();
-      ard_delay(6000);
+      /* ard_delay(6000); */
+      ard_delay(60);
   }
 }
 

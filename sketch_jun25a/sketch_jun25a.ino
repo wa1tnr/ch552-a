@@ -193,9 +193,9 @@ void print_cool_things(int count) {
         msg_starframed();
         serUSB_println(" * * *            s t a t e              * * *");
         msg_starframed();
-        serUSB_println(" * * *        kodaly five note           * * *");
+        serUSB_println(" * * *      forty nine twenty seven      * * *");
         msg_starframed();
-        serUSB_println(" * * *    Thu 27 Jun 00:38:34 UTC 2024   * * *");
+        serUSB_println(" * * *    Thu 27 Jun 04:43:30 UTC 2024   * * *");
         msg_starframed();
         msg_longstars();
         /* flushing_ny(); */
