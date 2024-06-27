@@ -234,10 +234,12 @@ __code int j = 0x7e;
 
 int *jadr = &j;
 
+#define LIMIT 0x1E00
 /* dump 16 bytes of RAM in hex with ascii on the side */
 void dumpRAM() {
   char *ram;
   ram = (char *) jadr;
+
   char buffer[5] = "";
 
   int pvr = (int) jadr;
@@ -262,8 +264,6 @@ void dumpRAM() {
   serUSB_write(':');
   serUSB_write(' ');
   serUSB_flush();
-  /* sprintf(buffer, "%4x", p); */
-  /* Serial.print(buffer); */
   serUSB_print("   ");
 
   /* individual hex 2-digit groups l to r */
@@ -276,7 +276,6 @@ void dumpRAM() {
     serUSB_print_hex(c);
     serUSB_write(' ');
   }
-  /* ram = (char*)pvr; */
   ram = (char *) jadr;
   serUSB_print("   ");
   for (uint8_t i = 0; i < 16; i++) {
@@ -285,26 +284,20 @@ void dumpRAM() {
     buffer[1] = '\0';
     serUSB_print(buffer);
   }
-  // push(pvr + 16);
-  jadr = jadr + 16;
+  if (jadr < LIMIT) {
+      jadr = jadr + 16;
+  }
 }
 
 /* dump 256 bytes of RAM */
 NAMED(_dumpr, "dump");
 void rdumps() {
-  // __code int q = 0x7f;
-  // __code int *pd = &q;
-  // int p = (int) pd;
-  // push(p);
-
   for (uint8_t i = 0; i < 16; i++) {
     serUSB_println("");
     dumpRAM();
   }
   serUSB_println("");
 }
-
-
 
 
 /* End of Forth interpreter words */
@@ -443,31 +436,26 @@ void runword() {
 /* Arduino main loop */
 
 void setupInterpreter() {
-  ard_delay(4000);
-  serUSB_println("");
-  serUSB_println("");
-  serUSB_println("");
+  ard_delay(3000); serUSB_println(""); serUSB_println(""); serUSB_println("");
   serUSB_println("seen: setupInterpreter();");
-  serUSB_println("");
-  serUSB_println("");
-  serUSB_println("");
-  serUSB_flush();
-  ard_delay(2000);
+  serUSB_println(""); serUSB_println(""); serUSB_println("");
+  serUSB_flush(); ard_delay(1000);
  
-  char c = 'b';
-  serUSB_write(c);
-  c = ' ';
-  serUSB_write(c);
+  char c = 'b'; serUSB_write(c); c = ' '; serUSB_write(c);
   serUSB_println ("Forth-like interpreter:");
   words();
-  serUSB_println ("");
-  serUSB_flush();
+  serUSB_println (""); serUSB_flush();
 
-  for (int i = 8; i > 0; i--) {
+
+  /* find exact lowest permissible address without exceeding it downwards */
+  jadr = (jadr - 4096);
+  jadr = (jadr - 0xFD);
+
+  for (int i = 32; i > 0; i--) {
       serUSB_flush();
       rdumps();
       serUSB_flush();
-      ard_delay(4000);
+      ard_delay(6000);
   }
 }
 
