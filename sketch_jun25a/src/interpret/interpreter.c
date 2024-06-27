@@ -5,6 +5,7 @@
 const int ledPin =  LED_BUILTIN;// the number of the LED pin
 
 
+extern void serUSB_print_int(int i);
 extern void serUSB_print_hex_int(int i);
 extern void serUSB_write(char c);
 extern void serUSB_print_hex(char c);
@@ -293,6 +294,17 @@ void dumpRAM() {
   int address = (int) ram ;
 
   address = address - 1;
+  address = address - 0x156;
+  /* predict: 0x0030 */
+
+/* 186 old to .. DUT now */
+
+  /***********************
+   *                     *
+   *    2 4 6 8 A C E    *
+   *   1 3 5 7 9 B D F   *
+   *                     *
+   ***********************/
 
 /*
   serUSB_print(" 0x");
@@ -325,11 +337,20 @@ void dumpRAM() {
     buffer[1] = '\0';
     serUSB_print(buffer);
   }
+      // jadr = jadr + 16;
+      for (int iter = 8; iter > 0; iter--) {
+        jadr++;
+      }
 
-      jadr = jadr + 16;
+      ard_delay(23);
+
       int tested = (int) jadr;
+
       /* if (tested > 0x3FB0) { */
-      if (tested > 0x1180) {
+      /* LIMIT   old 0x1180 */
+      /* if (tested > 0x0B80) { */
+
+      if (tested > 0x3480) {
         serUSB_println("   may be a DANGER  ");
         serUSB_flush();
         serUSB_println("");
@@ -495,6 +516,8 @@ void runword() {
 void setupInterpreter() {
   ard_delay(3000); serUSB_println(""); serUSB_println(""); serUSB_println("");
   serUSB_println("seen: setupInterpreter();");
+  serUSB_println("");
+  serUSB_println("  aye bee cee dee eee eff gee ach eye jay kay ell emm enn ohh pee que are ess tee you vee");
   serUSB_println(""); serUSB_println(""); serUSB_println("");
   serUSB_flush(); ard_delay(1000);
  
