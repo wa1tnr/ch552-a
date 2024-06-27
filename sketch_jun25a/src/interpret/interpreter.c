@@ -1,9 +1,7 @@
 #include <stdint.h>
-// locutus
 
 #define LED_BUILTIN 33
 const int ledPin =  LED_BUILTIN;// the number of the LED pin
-
 
 extern void serUSB_print_int(int i);
 extern void serUSB_print_hex_int(int i);
@@ -232,72 +230,45 @@ void input_pullup() {
   /* pinMode(pop(), INPUT_PULLUP); */
 }
 
-#define LIMIT 0x1E00
+#define LIMIT_OUTER_ONE_EACH_ 0x1E00
 
 __code int j = 0x7e;
 
-int *jadr = &j;
+int *jaddr = &j;
 
 void printZeds(int pvr) {
-  if (pvr < 0x10) {
-    serUSB_flush();
-    serUSB_print("0"); // pad print job with leading zero
-    serUSB_flush();
-    return;
-  }
+  if (pvr > 0xFFF) { return; }
+  serUSB_flush();
+  serUSB_print("0"); // pad print job with leading zero
+  serUSB_flush();
+  if (pvr > 0xFF) { return; }
   if (pvr < 0x100) {
+    serUSB_print("0");
     serUSB_flush();
-    serUSB_print("0"); // padding
-    serUSB_flush();
-    return;
+    if (pvr > 0x0F) { return; }
   }
-  if (pvr < 0x1000) {
-    serUSB_flush();
-    serUSB_print("0"); // padding
-    serUSB_flush();
-    return;
-  }
+  serUSB_flush();
+  serUSB_print("0");
+  serUSB_flush();
 }
-
-/*
- *     int *jadr = &j;    create int jadr and assign
- *                        the address of __code int j to it.
- *
- *     The  '&' operator gives an address not the content.
- */
 
 /* dump 16 bytes of RAM in hex with ascii on the side */
 void dumpRAM() {
-  char *ram; /* 'pointer var' with a (type of char) created */
-
-  ram = (char *) jadr;  /* assign  an int pointer var 'jadr', but
-                         * cast to a char*
-                         * to a pointer var, 'ram'.
-                         */
-
   char buffer[5] = "";
-  int pvr = (int) jadr; /* create an  int 'pvr'   and assign
-                         * a pointer var 'jadr'   (cast to an int)
-                         * to 'pvr'.
-                         *
-                         * It is known that pvr here will 
-                         */
 
-  serUSB_print("!");
-  serUSB_flush();
+  char *ram;
+  ram = (char *) jaddr;
+  serUSB_print("!"); serUSB_flush(); serUSB_print(" 0x"); serUSB_flush();
 
-  serUSB_print(" 0x");
-  serUSB_flush();
+  int pvr = (int) ram ;
+
+  // vuln bulk
+  for (int count = 9; count > 0; count--) {
+    pvr++;
+  }
 
   printZeds(pvr);
-
-  int address = (int) ram ;
-
-  address = address - 1;
-  address = address - 0x156;
-  /* predict: 0x0030 */
-
-/* 186 old to .. DUT now */
+  serUSB_print_hex_int(pvr);
 
   /***********************
    *                     *
@@ -306,14 +277,7 @@ void dumpRAM() {
    *                     *
    ***********************/
 
-/*
-  serUSB_print(" 0x");
-*/
-
-  serUSB_print_hex_int(address);
-
   serUSB_flush();
-
   serUSB_write(':');
   serUSB_write(' ');
   serUSB_flush();
@@ -323,13 +287,13 @@ void dumpRAM() {
   for (uint8_t i = 0; i < 16; i++) {
     char c = *ram++;
     c = c & 0xff;
-    if (c < 0x10) { // initially tested for c == 0 now want all single digit hex vals
-        serUSB_print("0"); // pad print with leading zero
+    if (c < 0x10) {
+        serUSB_print("0"); // padding
     }
     serUSB_print_hex(c);
     serUSB_write(' ');
   }
-  ram = (char *) jadr;
+  ram = (char *) jaddr;
   serUSB_print("   ");
   for (uint8_t i = 0; i < 16; i++) {
     buffer[0] = *ram++;
@@ -337,34 +301,29 @@ void dumpRAM() {
     buffer[1] = '\0';
     serUSB_print(buffer);
   }
-      // jadr = jadr + 16;
-      for (int iter = 8; iter > 0; iter--) {
-        jadr++;
-      }
+  for (int iter = 8; iter > 0; iter--) {
+    jaddr++;
+  }
 
-      ard_delay(23);
+  ard_delay(23);
 
-      int tested = (int) jadr;
+  int tested = (int) jaddr;
 
-      /* if (tested > 0x3FB0) { */
-      /* LIMIT   old 0x1180 */
-      /* if (tested > 0x0B80) { */
-
-      if (tested > 0x3480) {
-        serUSB_println("   may be a DANGER  ");
-        serUSB_flush();
-        serUSB_println("");
-        serUSB_flush();
-        serUSB_println("   see: interpreter.c  LINE 295");
-        serUSB_flush();
-        serUSB_println("");
-        serUSB_flush();
-        while(-1) {
-          ard_delay(2000);
-          serUSB_write('.');
-          serUSB_flush();
-        }
-      }
+  if (tested > 0x3480) {
+    serUSB_println("   may be a DANGER  ");
+    serUSB_flush();
+    serUSB_println("");
+    serUSB_flush();
+    serUSB_println("   see: interpreter.c  LINE 295");
+    serUSB_flush();
+    serUSB_println("");
+    serUSB_flush();
+    while(-1) {
+      ard_delay(2000);
+      serUSB_write('.');
+      serUSB_flush();
+    }
+  }
 }
 
 /* dump 256 bytes of RAM */
@@ -511,7 +470,6 @@ void runword() {
   /* Serial.println("?"); */
 }
 
-/* Arduino main loop */
 
 void setupInterpreter() {
   ard_delay(3000); serUSB_println(""); serUSB_println(""); serUSB_println("");
@@ -526,28 +484,9 @@ void setupInterpreter() {
   words();
   serUSB_println (""); serUSB_flush();
 
-
-  /* find exact lowest permissible address without exceeding it downwards */
-  jadr = (jadr - 4096);
-  jadr = (jadr - 0xFE);
-  jadr--;
-  jadr++;
-
-  jadr++;
-  jadr--;
-  jadr++;
-  jadr++;
-
-/*
-  for (int i = 73; i > 0; i--) {
-      jadr--;
-  }
-*/
-
-  for (int i = 48; i > 0; i--) {
-      jadr++;
-  }
-
+  jaddr++; jaddr--; // align
+  jaddr = jaddr - 0x1174; // right on the money (0x7C) so 0x74 there
+  jaddr++; jaddr--;
 
   for (int i = 32; i > 0; i--) {
       serUSB_flush();
@@ -564,4 +503,4 @@ void Interpreter() {
 }
 
 /* Sun 23 Jun 11:30:54 UTC 2024 */
-/* Thu 27 Jun 17:39:01 UTC 2024 */
+/* Thu 27 Jun 21:46:22 UTC 2024 */
