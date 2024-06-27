@@ -97,20 +97,17 @@ fzf
 
 // void flushing_ny() {
 
-void ard_delay(int ms) {
-    delay(ms);
-}
+void ard_delay(int ms) { delay(ms); }
 
-void serUSB_print_hex_int(int i) {
-    USBSerial_print(i, HEX);
-}
+void serUSB_print_int(int i) { USBSerial_print(i); }
 
-void serUSB_flush() {
-    USBSerial_flush();
-}
+void serUSB_print_hex_int(int i) { USBSerial_print(i, HEX); }
+
+void serUSB_flush() { USBSerial_flush(); }
 
 void serUSB_print_hex(char c) {
-    if(c > 255) return;
+    if (c > 255)
+        return;
     USBSerial_print(c, HEX);
 }
 
@@ -183,24 +180,23 @@ void msg_starframed() {
     serUSB_println(" * * *                                   * * *");
 }
 
-
 void print_cool_things(int count) {
-        serUSB_println("darmok and gilad at tenagra in statis 8051 pbrsgng.. ");
-        serUSB_println("");
-        USBSerial_print(count);
-        serUSB_println("");
-        msg_longstars();
-        msg_starframed();
-        serUSB_println(" * * *            s t a t e              * * *");
-        msg_starframed();
-        serUSB_println(" * * *      forty nine twenty seven      * * *");
-        msg_starframed();
-        serUSB_println(" * * *    Thu 27 Jun 04:43:30 UTC 2024   * * *");
-        msg_starframed();
-        msg_longstars();
-        /* flushing_ny(); */
-        serUSB_flush();
-        slower();
+    serUSB_println("darmok and gilad at tenagra in statis 8051 pbrsgng.. ");
+    serUSB_println("");
+    USBSerial_print(count);
+    serUSB_println("");
+    msg_longstars();
+    msg_starframed();
+    serUSB_println(" * * *            s t a t e              * * *");
+    msg_starframed();
+    serUSB_println(" * * *      forty nine twenty seven      * * *");
+    msg_starframed();
+    serUSB_println(" * * *    Thu 27 Jun 15:19:15 UTC 2024   * * *");
+    msg_starframed();
+    msg_longstars();
+    /* flushing_ny(); */
+    serUSB_flush();
+    slower();
 }
 
 void do_cool_things() {
@@ -229,8 +225,6 @@ void setup() {
     do_cool_things();
 }
 
-void loop() {
-    dutyBlink();
-}
+void loop() { dutyBlink(); }
 
 /* end */
