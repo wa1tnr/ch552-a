@@ -239,9 +239,7 @@ int *jadr = &j;
 void dumpRAM() {
   char *ram;
   ram = (char *) jadr;
-
   char buffer[5] = "";
-
   int pvr = (int) jadr;
 
   if (pvr < 0x10) {
@@ -255,7 +253,8 @@ void dumpRAM() {
     serUSB_flush();
   }
 
-  int address = (int) ram;
+  int address = (int) ram ;
+  address = address - 1;
 
   serUSB_print(" 0x");
   serUSB_print_hex_int(address);
@@ -284,9 +283,13 @@ void dumpRAM() {
     buffer[1] = '\0';
     serUSB_print(buffer);
   }
+  /*
   if (jadr < LIMIT) {
+  */
       jadr = jadr + 16;
+  /*
   }
+  */
 }
 
 /* dump 256 bytes of RAM */
@@ -449,7 +452,12 @@ void setupInterpreter() {
 
   /* find exact lowest permissible address without exceeding it downwards */
   jadr = (jadr - 4096);
-  jadr = (jadr - 0xFD);
+  jadr = (jadr - 0xFE);
+  jadr--;
+  jadr++;
+
+  jadr++;
+  jadr--;
 
   for (int i = 32; i > 0; i--) {
       serUSB_flush();
