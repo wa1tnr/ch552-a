@@ -1,4 +1,5 @@
 #include <stdint.h>
+// locutus
 
 #define LED_BUILTIN 33
 const int ledPin =  LED_BUILTIN;// the number of the LED pin
@@ -230,34 +231,75 @@ void input_pullup() {
   /* pinMode(pop(), INPUT_PULLUP); */
 }
 
+#define LIMIT 0x1E00
+
 __code int j = 0x7e;
 
 int *jadr = &j;
 
-#define LIMIT 0x1E00
-/* dump 16 bytes of RAM in hex with ascii on the side */
-void dumpRAM() {
-  char *ram;
-  ram = (char *) jadr;
-  char buffer[5] = "";
-  int pvr = (int) jadr;
-
+void printZeds(int pvr) {
   if (pvr < 0x10) {
     serUSB_flush();
-    serUSB_print("0"); // pad print with leading zero
+    serUSB_print("0"); // pad print job with leading zero
     serUSB_flush();
+    return;
   }
-
-  if (pvr > 0xFF) {
-    serUSB_print("!");
+  if (pvr < 0x100) {
     serUSB_flush();
+    serUSB_print("0"); // padding
+    serUSB_flush();
+    return;
   }
+  if (pvr < 0x1000) {
+    serUSB_flush();
+    serUSB_print("0"); // padding
+    serUSB_flush();
+    return;
+  }
+}
 
-  int address = (int) ram ;
-  address = address - 1;
+/*
+ *     int *jadr = &j;    create int jadr and assign
+ *                        the address of __code int j to it.
+ *
+ *     The  '&' operator gives an address not the content.
+ */
+
+/* dump 16 bytes of RAM in hex with ascii on the side */
+void dumpRAM() {
+  char *ram; /* 'pointer var' with a (type of char) created */
+
+  ram = (char *) jadr;  /* assign  an int pointer var 'jadr', but
+                         * cast to a char*
+                         * to a pointer var, 'ram'.
+                         */
+
+  char buffer[5] = "";
+  int pvr = (int) jadr; /* create an  int 'pvr'   and assign
+                         * a pointer var 'jadr'   (cast to an int)
+                         * to 'pvr'.
+                         *
+                         * It is known that pvr here will 
+                         */
+
+  serUSB_print("!");
+  serUSB_flush();
 
   serUSB_print(" 0x");
+  serUSB_flush();
+
+  printZeds(pvr);
+
+  int address = (int) ram ;
+
+  address = address - 1;
+
+/*
+  serUSB_print(" 0x");
+*/
+
   serUSB_print_hex_int(address);
+
   serUSB_flush();
 
   serUSB_write(':');
@@ -286,7 +328,8 @@ void dumpRAM() {
 
       jadr = jadr + 16;
       int tested = (int) jadr;
-      if (tested > 0x3FB0) {
+      /* if (tested > 0x3FB0) { */
+      if (tested > 0x1180) {
         serUSB_println("   may be a DANGER  ");
         serUSB_flush();
         serUSB_println("");
@@ -498,5 +541,4 @@ void Interpreter() {
 }
 
 /* Sun 23 Jun 11:30:54 UTC 2024 */
-/* Sun 23 Jun 12:31:20 UTC 2024 */
-/* Thu 27 Jun 00:38:34 UTC 2024 */
+/* Thu 27 Jun 17:39:01 UTC 2024 */
