@@ -234,36 +234,30 @@ int *jadr = &j;
 
 /* dump 16 bytes of RAM in hex with ascii on the side */
 void dumpRAM() {
-
-
-  int jadrPrn = (int) jadr;
-
-  // serUSB_print(" jadrPrn: ");
-  // serUSB_println(jadrPrn);
-  // serUSB_flush();
-  serUSB_flush();
-
   char *ram;
   ram = (char *) jadr;
-
   char buffer[5] = "";
 
   int pvr = (int) jadr;
 
   if (pvr < 0x10) {
+    serUSB_flush();
     serUSB_print("0"); // pad print with leading zero
+    serUSB_flush();
   }
 
   if (pvr > 0xFF) {
     serUSB_print("!");
+    serUSB_flush();
   }
 
-  int address = (int) &ram;
-  // serUSB_print_hex(pvr);
-  serUSB_print(address);
+  int address = (int) pvr;
+  serUSB_print(" no address");
+  serUSB_flush();
 
   serUSB_write(':');
   serUSB_write(' ');
+  serUSB_flush();
   /* sprintf(buffer, "%4x", p); */
   /* Serial.print(buffer); */
   serUSB_print("   ");
