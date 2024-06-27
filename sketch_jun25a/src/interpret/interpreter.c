@@ -3,6 +3,8 @@
 #define LED_BUILTIN 33
 const int ledPin =  LED_BUILTIN;// the number of the LED pin
 
+
+extern void serUSB_print_hex_int(int i);
 extern void serUSB_write(char c);
 extern void serUSB_print_hex(char c);
 extern void serUSB_print(char *str);
@@ -251,8 +253,10 @@ void dumpRAM() {
     serUSB_flush();
   }
 
-  int address = (int) pvr;
-  serUSB_print(" no address");
+  int address = (int) ram;
+
+  serUSB_print(" 0x");
+  serUSB_print_hex_int(address);
   serUSB_flush();
 
   serUSB_write(':');
@@ -458,23 +462,6 @@ void setupInterpreter() {
   words();
   serUSB_println ("");
   serUSB_flush();
-  /* push(1200); */
-
-  // __code int sample = 0x7F;
-
-  // int* p;
-  // p = & sample;
-  // p = & sample;
-
-  // char rst = (char) &p;
-  // char rst = (char) p;
-
-  // serUSB_print(" p = & sample = ");
-
-  // serUSB_print_hex(rst);
-
-  // serUSB_println("");
-  // serUSB_flush();
 
   for (int i = 8; i > 0; i--) {
       serUSB_flush();
@@ -491,3 +478,4 @@ void Interpreter() {
 
 /* Sun 23 Jun 11:30:54 UTC 2024 */
 /* Sun 23 Jun 12:31:20 UTC 2024 */
+/* Thu 27 Jun 00:38:34 UTC 2024 */

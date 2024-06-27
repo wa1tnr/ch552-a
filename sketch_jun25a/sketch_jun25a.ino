@@ -101,6 +101,10 @@ void ard_delay(int ms) {
     delay(ms);
 }
 
+void serUSB_print_hex_int(int i) {
+    USBSerial_print(i, HEX);
+}
+
 void serUSB_flush() {
     USBSerial_flush();
 }
@@ -189,9 +193,9 @@ void print_cool_things(int count) {
         msg_starframed();
         serUSB_println(" * * *            s t a t e              * * *");
         msg_starframed();
-        serUSB_println(" * * *        jelly roll morton          * * *");
+        serUSB_println(" * * *        kodaly five note           * * *");
         msg_starframed();
-        serUSB_println(" * * *    Wed 26 Jun 13:36:21 UTC 2024   * * *");
+        serUSB_println(" * * *    Thu 27 Jun 00:38:34 UTC 2024   * * *");
         msg_starframed();
         msg_longstars();
         /* flushing_ny(); */
