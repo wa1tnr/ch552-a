@@ -415,6 +415,7 @@ uint8_t reading() {
             serUSB_write(' '); serUSB_flush();
             serUSB_write(BACKSPACE); serUSB_flush();
         }
+        serUSB_write(' '); serUSB_flush();
         ahua_flg = 0; // reset
     }
 
@@ -431,7 +432,8 @@ uint8_t reading() {
             tib[--pos] = 0; // oblit captured char stored in tib
         }
         if (pos == 0) {
-            serUSB_print("ahua! ");
+            serUSB_write(BACKSPACE);
+            serUSB_print(" ahua!");
             serUSB_flush();
             ahua_flg = -1;
         }
