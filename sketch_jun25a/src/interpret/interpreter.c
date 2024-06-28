@@ -399,19 +399,57 @@ void ok() {
         return; /* NO RETURN it is this instead: Serial.println("ok"); */
 }
 
+#define BACKSPACE '\010'
+#define RUBOUT '\177'
+
+uint8_t ahua_flg = 0;
+
 /* Incrementally read command line from serial port */
 /* byte reading() { */
 uint8_t reading() {
     if (!serUSB_available()) return 1;
+
+    if (ahua_flg) {
+        for (int count = 6; count > 0; count--) {
+            serUSB_write(BACKSPACE); serUSB_flush();
+            serUSB_write(' '); serUSB_flush();
+            serUSB_write(BACKSPACE); serUSB_flush();
+        }
+        ahua_flg = 0; // reset
+    }
+
     ch = serUSB_read();
     serUSB_write(ch); // NEW  echo keytroke 
     serUSB_flush();
+
+    if (ch == BACKSPACE) {
+        serUSB_write(' '); // oblit - was already echo_d so cursor is in right spot for this
+        serUSB_flush();
+        serUSB_write(BACKSPACE); // move cursor
+        serUSB_flush();
+        if (pos > 0) {
+            tib[--pos] = 0; // oblit captured char stored in tib
+        }
+        if (pos == 0) {
+            serUSB_print("ahua! ");
+            serUSB_flush();
+            ahua_flg = -1;
+        }
+        return 1;
+
+    }
+
     if (ch == '\n')
         return 1;
-    if (ch == '\r')
+    if (ch == '\r') {
+        serUSB_write('\n'); // or no linefeed here
+        serUSB_flush();
         return 0;
+    }
+
     if (ch == ' ')
         return 0;
+
     if (pos < maxtib) {
         tib[pos++] = ch;
         tib[pos] = 0;
@@ -427,11 +465,21 @@ void readword() {
     tib[0] = 0;
     while (reading())
         ;
-    serUSB_print(tib);
-    serUSB_flush();
-    serUSB_print(" ");
-    serUSB_flush();
-    serUSB_flush();
+
+    if (0) { serUSB_println(""); serUSB_flush(); serUSB_println("doubleEcho testing for a conditional, LINE: 431"); serUSB_println(""); serUSB_flush(); }
+
+    uint8_t doubleEcho = -1; /* 0 normal - use -1  for the ACTIVE state */
+    if (doubleEcho) {
+        serUSB_flush();
+        serUSB_print(" backspace_testing_tib: ");
+        serUSB_flush();
+        serUSB_print(tib);
+        serUSB_flush();
+        serUSB_print(" :end_tib ");
+        serUSB_flush();
+        serUSB_print(" ");
+        serUSB_flush();
+    }
 }
 
 /* Run a word via its name */
