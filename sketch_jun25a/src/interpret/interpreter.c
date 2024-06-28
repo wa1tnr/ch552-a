@@ -3,6 +3,9 @@
 #define LED_BUILTIN 33
 const int ledPin = LED_BUILTIN; // the number of the LED pin
 
+extern uint8_t serUSB_available();
+extern char serUSB_read();
+
 extern void serUSB_print_int(int i);
 extern void serUSB_print_hex_int(int i);
 extern void serUSB_write(char c);
@@ -400,6 +403,8 @@ void ok() {
 /* byte reading() { */
 uint8_t reading() {
     /* if (!Serial.available()) return 1; */
+    if (!serUSB_available()) return 1;
+    ch = serUSB_read();
     ch = 'a'; /* no constant it is this instead: Serial.read(); */
     if (ch == '\n')
         return 1;
@@ -421,8 +426,8 @@ void readword() {
     tib[0] = 0;
     while (reading())
         ;
-    /* Serial.print(tib); */
-    /* Serial.print(" "); */
+    serUSB_print(tib);
+    serUSB_print(" ");
 }
 
 /* Run a word via its name */
@@ -438,7 +443,7 @@ void runword() {
         ok();
         return;
     }
-    /* Serial.println("?"); */
+    /* serUSB_println("?"); */
 }
 
 void setupInterpreter() {
