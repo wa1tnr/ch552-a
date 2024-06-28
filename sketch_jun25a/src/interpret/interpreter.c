@@ -409,18 +409,23 @@ uint8_t ahua_flg = 0;
 uint8_t reading() {
     if (!serUSB_available()) return 1;
 
+    ch = serUSB_read();
+
     if (ahua_flg) {
-        for (int count = 6; count > 0; count--) {
-            serUSB_write(BACKSPACE); serUSB_flush();
+        int counted;
+        counted = 7;
+        if (ch == BACKSPACE) { counted = 6; }
+        serUSB_write(' '); serUSB_flush();
+        serUSB_write(BACKSPACE); serUSB_flush();
+        for (int count = counted; count > 0; count--) {
             serUSB_write(' '); serUSB_flush();
+            serUSB_write(BACKSPACE); serUSB_flush();
             serUSB_write(BACKSPACE); serUSB_flush();
         }
         serUSB_write(' '); serUSB_flush();
         ahua_flg = 0; // reset
     }
-
-    ch = serUSB_read();
-    serUSB_write(ch); // NEW  echo keytroke 
+    serUSB_write(ch);
     serUSB_flush();
 
     if (ch == BACKSPACE) {
@@ -432,9 +437,9 @@ uint8_t reading() {
             tib[--pos] = 0; // oblit captured char stored in tib
         }
         if (pos == 0) {
-            serUSB_write(BACKSPACE);
-            serUSB_print(" ahua!");
-            serUSB_flush();
+            // serUSB_write(' '); serUSB_flush();
+            // serUSB_write(BACKSPACE); serUSB_flush();
+            serUSB_print(" ahua!"); serUSB_flush();
             ahua_flg = -1;
         }
         return 1;
