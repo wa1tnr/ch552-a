@@ -173,11 +173,11 @@ void slower() {
 // extern void Interpreter();
 
 void msg_longstars() {
-    serUSB_println(" * * * * * * * * * * * * * * * * * * * * * * *");
+    serUSB_println(" * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *");
 }
 
 void msg_starframed() {
-    serUSB_println(" * * *                                   * * *");
+    serUSB_println(" * * *                                                         * * *");
 }
 
 void print_cool_things(int count) {
@@ -185,20 +185,41 @@ void print_cool_things(int count) {
     serUSB_println("");
     USBSerial_print(count);
     serUSB_println("");
+
     msg_longstars();
+
     msg_starframed();
-    serUSB_println(" * * *            s t a t e              * * *");
+
+    serUSB_println(" * * *                     s t a t e                           * * *");
     msg_starframed();
-    serUSB_println(" * * *    good zero alignment and no     * * *");
-    serUSB_println(" * * *    longer skips every other       * * *");
-    serUSB_println(" * * *    row - solid.                   * * *");
+    serUSB_println(" * * *    pointer origin is gained by creation of __code var   * * *");
+    serUSB_println(" * * *    and pointing to it.                                  * * *");
     msg_starframed();
-    serUSB_println(" * * *    eight ninety-two point four    * * *");
+    serUSB_println(" * * *    location is random to this purpose (no easy way      * * *");
+    serUSB_println(" * * *    to suss that) so the rude dodge of decrementing      * * *");
+    serUSB_println(" * * *    a pointer to it is employed.                         * * *");
     msg_starframed();
-    serUSB_println(" * * *    Thu 27 Jun 22:16:09 UTC 2024   * * *");
+    msg_starframed();
+    serUSB_println(" * * *    Now *that* is an ugly hack, but has kicked the       * * *");
+    serUSB_println(" * * *    door down, so to speak - allowing .. cont later      * * *");
+    msg_starframed();
+    msg_starframed();
+    serUSB_println(" * * *            six fourteen Mars Std Time                   * * *");
+    msg_starframed();
+    serUSB_println(" * * *           Fri 28 Jun 17:13:37 UTC 2024                  * * *");
     msg_starframed();
     msg_longstars();
-    /* flushing_ny(); */
+
+#if 0
+#endif
+
+/****
+ * 
+ * 
+ */
+
+    msg_starframed();
+    msg_longstars();
     serUSB_flush();
     slower();
 }
@@ -207,6 +228,7 @@ void do_cool_things() {
     for (int index = 225; index > 0; index--) {
         int count = index;
         print_cool_things(count);
+        delay(1400);
     }
     pinMode(LED_BUILTIN, OUTPUT);
 }

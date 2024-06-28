@@ -250,10 +250,7 @@ void dumpRAM() {
 
     int pvr = (int)ram;
 
-    // vuln bulk
-    for (int count = 9; count > 0; count--) {
-        pvr++;
-    }
+    // vuln bulk for (int count = 9; count > 0; count--) { pvr++; }
 
     printZeds(pvr);
     serUSB_print_hex_int(pvr);
@@ -468,18 +465,22 @@ void setupInterpreter() {
     serUSB_println("");
     serUSB_flush();
 
-    jaddr++;
-    jaddr--;                // align
-    jaddr = jaddr - 0x1174; // right on the money (0x7C) so 0x74 there
-    jaddr++;
-    jaddr--;
+    for (int offset = (0x11C0 + 0xB); offset > 0; offset--) {
+        jaddr--;  // re-align
+    }
 
-    // SAID 32 not 48 < 2214z
+
+    for (int offset = (0x10F + 0x4); offset > 0; offset--) {
+        jaddr--;  // re-align
+    }
+
+
+    // ard_delay(30000);
+
     for (int i = 48; i > 0; i--) {
         serUSB_flush();
         rdumps();
         serUSB_flush();
-        /* ard_delay(6000); */
         ard_delay(60);
     }
 }
@@ -489,5 +490,10 @@ void Interpreter() {
     runword();
 }
 
-/* Sun 23 Jun 11:30:54 UTC 2024 */
-/* Thu 27 Jun 22:18:40 UTC 2024 */
+/*
+ * Fri 28 Jun 16:46:02 UTC 2024
+ * Thu 27 Jun 22:18:40 UTC 2024
+ * Sun 23 Jun 11:30:54 UTC 2024
+ */
+
+/* end. */
