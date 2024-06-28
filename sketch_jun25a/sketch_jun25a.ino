@@ -247,16 +247,18 @@ void dutyBlink() {
 }
 
 extern void setupInterpreter();
+extern void Interpreter();
 
 void setup() {
     delay(4000);
-    USBSerial_println(" running setupInterpreter below:");
+    USBSerial_println(" void(setup() is running..");
+    // USBSerial_println(" running setupInterpreter below:");
     delay(1000);
     setupInterpreter();
-    delay(8000);
-    do_cool_things();
+    // delay(8000);
+    // do_cool_things();
 }
 
-void loop() { dutyBlink(); }
+void loop() { Interpreter(); }
 
 /* end */

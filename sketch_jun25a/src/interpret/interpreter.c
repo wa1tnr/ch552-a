@@ -402,10 +402,10 @@ void ok() {
 /* Incrementally read command line from serial port */
 /* byte reading() { */
 uint8_t reading() {
-    /* if (!Serial.available()) return 1; */
     if (!serUSB_available()) return 1;
     ch = serUSB_read();
-    ch = 'a'; /* no constant it is this instead: Serial.read(); */
+    serUSB_write(ch); // NEW  echo keytroke 
+    serUSB_flush();
     if (ch == '\n')
         return 1;
     if (ch == '\r')
@@ -422,12 +422,16 @@ uint8_t reading() {
 /* Block on reading the command line from serial port */
 /* then echo each word */
 void readword() {
+    serUSB_flush();
     pos = 0;
     tib[0] = 0;
     while (reading())
         ;
     serUSB_print(tib);
+    serUSB_flush();
     serUSB_print(" ");
+    serUSB_flush();
+    serUSB_flush();
 }
 
 /* Run a word via its name */
@@ -451,7 +455,7 @@ void setupInterpreter() {
     serUSB_println("");
     serUSB_println("");
     serUSB_println("");
-    serUSB_println("seen: setupInterpreter();");
+    serUSB_flush();
     serUSB_println("");
     serUSB_println("  aye bee cee dee eee eff gee ach eye jay kay ell emm enn "
                    "ohh pee que are ess tee you vee");
@@ -479,18 +483,25 @@ void setupInterpreter() {
         jaddr--;  // re-align
     }
 
+    /* ard_delay(30); */
 
-    // ard_delay(30000);
+    uint8_t switchedOn = 0; /* -1  ACTIVE state */
 
-    for (int i = 48; i > 0; i--) {
+    if (switchedOn) {
+        serUSB_println("  LINE 489:    switchedOn active");
         serUSB_flush();
-        rdumps();
-        serUSB_flush();
-        ard_delay(60);
+        for (int i = 48; i > 0; i--) {
+            serUSB_flush();
+            rdumps();
+            serUSB_flush();
+            ard_delay(60);
+        }
     }
 }
 
 void Interpreter() {
+    // serUSB_println("  entering Interpreter..");
+    serUSB_flush();
     readword();
     runword();
 }
