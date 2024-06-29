@@ -403,6 +403,7 @@ void ok() {
 #define RUBOUT '\177'
 
 uint8_t ahua_flg = 0;
+uint8_t two_ahua_flg = 0;
 
 /* Incrementally read command line from serial port */
 /* byte reading() { */
@@ -413,9 +414,17 @@ uint8_t reading() {
 
     if (ahua_flg) {
         int counted;
-        counted = 7;
-        if (ch == BACKSPACE) { counted = 6; }
-        serUSB_write(' '); serUSB_flush();
+        counted = 6;
+
+        if (ch == BACKSPACE) {
+            two_ahua_flg = -1;
+        }
+
+        if (two_ahua_flg) {
+            serUSB_write(' '); serUSB_flush();
+        }
+        two_ahua_flg = 0; // reset
+
         serUSB_write(BACKSPACE); serUSB_flush();
         for (int count = counted; count > 0; count--) {
             serUSB_write(' '); serUSB_flush();
