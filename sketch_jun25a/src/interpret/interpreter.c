@@ -1,4 +1,23 @@
+/* interpreter.c - Shattuck's Forth-like interpreter - port to CH552 8051 MCU */
+/* June, 2024 */
+
 #include <stdint.h>
+/***
+ *
+ *
+ * include <string.h>
+ *
+ *   strcpy
+ *
+ *
+ * include <stdlib.h>
+ *
+ *   extern long int strtol(const char *nptr, char **endptr, int base);
+ *
+ */
+
+#include <string.h>
+#include <stdlib.h>
 
 #define LED_BUILTIN 33
 const int ledPin = LED_BUILTIN; // the number of the LED pin
@@ -28,6 +47,7 @@ __code int j = 0x7e;
 
 // cannot do anything here - likely is boot area:
 __code __at(0x0) char ORG;
+
 // __code __at (0x0) char ORG[64] = "seasons don't fear the reaper .. Nor do the
 // wind, the sun or the rain";
 
@@ -366,6 +386,10 @@ void rdumps() {
 /* Now build the dictionary */
 
 /* empty words don't cause an error */
+
+NAMED(_nopp, " ");
+void nopp() {}
+
 NAMED(_nop, " ");
 void nop() {}
 
@@ -375,6 +399,7 @@ void words();
 
 /* table of names and function addresses in flash */
 const entry dictionary[] = {
+    {_nopp, nopp},
     {_nop, nop},       {_words, words},   {_dup, dup},
     {_drop, drop},     {_back, back},     {_swap, swap},
     {_over, over},     {_add, add},       {_and, and_},
@@ -391,34 +416,47 @@ const int entries = sizeof dictionary / sizeof dictionary[0];
 /* Display all words in dictionary */
 void words() {
     for (int i = entries - 1; i >= 0; i--) {
-        /* strcpy(namebuf, dictionary[i].name); */
-        /* Serial.print(namebuf); */
-        /* Serial.print(" "); */
+        strcpy(namebuf, dictionary[i].name);
+        serUSB_print(namebuf);
+        serUSB_write(' ');
     }
 }
 
 /* Find a word in the dictionary, returning its position */
 int locate() {
+    serUSB_println("  -+- locate(): -+-"); serUSB_flush();
     for (int i = entries; i >= 0; i--) {
-        /* strcpy(namebuf, dictionary[i].name); */
-        /* if (!strcmp(tib, namebuf)) return i; */
+        strcpy(namebuf, dictionary[i].name);
+        if (!strcmp(tib, namebuf)) {
+            serUSB_print("  locate() returns: ");
+            serUSB_flush();
+
+            serUSB_print_int(i);
+            serUSB_flush();
+
+            serUSB_println("");
+            serUSB_flush();
+            return i;
+        }
     }
+    serUSB_println("  locate() returns zero.");
+    serUSB_flush();
     return 0;
 }
 
 /* Is the word in tib a number? */
 int isNumber() {
-    /* char *endptr; */
-    /* strtol(tib, &endptr, 0); */
-    /* if (endptr == tib) return 0; */
-    /* if (*endptr != '\0') return 0; */
+    char *endptr;
+    strtol(tib, &endptr, 0);
+    if (endptr == tib) return 0;
+    if (*endptr != '\0') return 0;
     return 1;
 }
 
 /* Convert number in tib */
 int number() {
-    /* char *endptr; */
-    /* return (int) strtol(tib, &endptr, 0); */
+    char *endptr;
+    return (int) strtol(tib, &endptr, 0);
 }
 
 char ch;
@@ -527,7 +565,7 @@ void readword() {
         serUSB_flush();
     }
 
-    uint8_t doubleEcho = -1; /* 0 normal - use -1  for the ACTIVE state */
+    uint8_t doubleEcho = 0; /* 0 normal - use -1  for the ACTIVE state */
     if (doubleEcho) {
         serUSB_flush();
         serUSB_print(" backspace_testing_tib: ");
@@ -543,6 +581,8 @@ void readword() {
 
 /* Run a word via its name */
 void runword() {
+    serUSB_println("  - - - runword():  - - -");
+    serUSB_flush();
     int place = locate();
     if (place != 0) {
         dictionary[place].function();
@@ -559,7 +599,7 @@ void runword() {
 
 void thing_bb() {
 
-    int iterations = 32;
+    int iterations = 2; // 32
 
     for (int i = iterations; i > 0; i--) {
         serUSB_flush();
@@ -638,7 +678,7 @@ void Interpreter() {
  *
  * strcpy(namebuf, dictionary[i].name);
  *
- *
+ * TODO: strcpy in the sdcc PDF
  */
 
 /* end. */
