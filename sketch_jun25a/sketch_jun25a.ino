@@ -99,9 +99,15 @@ fzf
 
 void ard_delay(int ms) { delay(ms); }
 
-uint8_t serUSB_available() { uint8_t avail = USBSerial_available(); return avail; }
+uint8_t serUSB_available() {
+    uint8_t avail = USBSerial_available();
+    return avail;
+}
 
-char serUSB_read() { char c = USBSerial_read(); return c; }
+char serUSB_read() {
+    char c = USBSerial_read();
+    return c;
+}
 
 void serUSB_print_int(int i) { USBSerial_print(i); }
 
@@ -177,15 +183,17 @@ void slower() {
 // extern void Interpreter();
 
 void msg_longstars() {
-    serUSB_println("   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *");
+    serUSB_println("   * * * * * * * * * * * * * * * * * * * * * * * * * * * * "
+                   "* * * * * *");
 }
 
 void msg_starframed() {
-    serUSB_println("   * * *                                                         * * *");
+    serUSB_println("   * * *                                                   "
+                   "      * * *");
 }
 
 void print_cool_things(int count) {
-    serUSB_println("darmok and gilad at tenagra in statis 8051 pbrsgng.. ");
+    serUSB_println("darmok and gilad at tenagra eyes open 8051 pbrsgng.. ");
     serUSB_println("");
     USBSerial_print(count);
     serUSB_println("");
@@ -194,35 +202,44 @@ void print_cool_things(int count) {
 
     msg_starframed();
 
-    serUSB_println("   * * *                     s t a t e                           * * *");
+    serUSB_println("   * * *                     s t a t e                     "
+                   "      * * *");
     msg_starframed();
-    serUSB_println("   * * *    pointer origin is gained by creation of __code var   * * *");
-    serUSB_println("   * * *    and pointing to it.                                  * * *");
+    serUSB_println("   * * *    pointer origin is gained by creation of __code "
+                   "var   * * *");
+    serUSB_println("   * * *    and pointing to it.                            "
+                   "      * * *");
     msg_starframed();
-    serUSB_println("   * * *    location is random to this purpose (no easy way      * * *");
-    serUSB_println("   * * *    to suss that) so the rude dodge of decrementing      * * *");
-    serUSB_println("   * * *    a pointer to it is employed.                         * * *");
+    serUSB_println("   * * *    location is random to this purpose (no easy "
+                   "way      * * *");
+    serUSB_println("   * * *    to suss that) so the rude dodge of "
+                   "decrementing      * * *");
+    serUSB_println("   * * *    a pointer to it is employed.                   "
+                   "      * * *");
     msg_starframed();
+    serUSB_println("   * * *    Now *that* is an ugly hack, but has kicked the "
+                   "      * * *");
+    serUSB_println("   * * *    door down, so to speak - allowing .. cont "
+                   "later      * * *");
     msg_starframed();
-    serUSB_println("   * * *    Now *that* is an ugly hack, but has kicked the       * * *");
-    serUSB_println("   * * *    door down, so to speak - allowing .. cont later      * * *");
+    serUSB_println("   * * *    UPDATE: scratch that.  It was quite simple.    "
+                   "      * * *");
     msg_starframed();
-    serUSB_println("   * * *    git repos updated: Fri 28th 17:24z or so.            * * *");
+    serUSB_println("   * * *    git repos updated: Fri 28th 17:24z or so.      "
+                   "      * * *");
     msg_starframed();
+    serUSB_println("   * * *         four eighty-seven Mars Std Time           "
+                   "      * * *");
     msg_starframed();
-    serUSB_println("   * * *            six fourteen Mars Std Time                   * * *");
-    msg_starframed();
-    serUSB_println("   * * *           Fri 28 Jun 17:24:27 UTC 2024                  * * *");
+    serUSB_println("   * * *           Sat 29 Jun 17:35:18 UTC 2024            "
+                   "      * * *");
     msg_starframed();
     msg_longstars();
 
-#if 0
-#endif
-
-/****
- * 
- * 
- */
+    /****
+     *
+     *
+     */
 
     msg_starframed();
     msg_longstars();

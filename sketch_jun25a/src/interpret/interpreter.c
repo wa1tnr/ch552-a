@@ -15,6 +15,35 @@ extern void serUSB_println(char *str);
 extern void serUSB_flush();
 extern void ard_delay(int ms);
 
+#define LIMIT_OUTER_ONE_EACH_ 0x1E00
+
+#define SEE_LINE()                                                             \
+    serUSB_print("   see: interpreter.c  LINE ");                              \
+    serUSB_print_int(__LINE__);                                                \
+    serUSB_println("")
+
+uint8_t slower = 0;
+
+__code int j = 0x7e;
+
+// cannot do anything here - likely is boot area:
+__code __at(0x0) char ORG;
+// __code __at (0x0) char ORG[64] = "seasons don't fear the reaper .. Nor do the
+// wind, the sun or the rain";
+
+__code char smallORG[72] =
+    "seasons don't fear the reaper .. Nor do the wind, the sun or the rain";
+//  [72] =
+//  "123456781234567812345678123456781234567812345678123456781234567812345678"
+//  [72] = "       8      16      24      32      40      48      56      64 72"
+//  [80] =
+//  "12345678123456781234567812345678123456781234567812345678123456781234567812345678"
+//  [80] = "       8      16      24      32      40      48      56      64 72
+//  80"
+
+int *ORG_ptr = &ORG; // okay for reading only
+int *jaddr = &j;
+
 /* Tiny interpreter,
    similar to myforth's Standalone Interpreter
    This example code is in the public domain */
@@ -173,7 +202,8 @@ void dotS() {
 
 /* delay TOS # of milliseconds */
 NAMED(_delay, "delay");
-void del() { /* delay(pop()); */ }
+void del() { /* delay(pop()); */
+}
 
 /* Toggle pin at TOS and delay(spd), repeat... */
 NAMED(_wiggle, "wiggle");
@@ -190,33 +220,33 @@ void wiggle() {
 
 /* TOS is pin number, set it HIGH */
 NAMED(_high, "high");
-void high() { /* digitalWrite(pop(), HIGH); */ }
+void high() { /* digitalWrite(pop(), HIGH); */
+}
 
 /* set TOS pin LOW */
 NAMED(_low, "low");
-void low() { /* digitalWrite(pop(), LOW); */ }
+void low() { /* digitalWrite(pop(), LOW); */
+}
 
 /* read TOS pin */
 NAMED(_in, "in");
-void in() { /* TOS = digitalRead(TOS); */ }
+void in() { /* TOS = digitalRead(TOS); */
+}
 
 /* make TOS pin an input */
 NAMED(_input, "input");
-void input() { /* pinMode(pop(), INPUT); */ }
+void input() { /* pinMode(pop(), INPUT); */
+}
 
 /* make TOS pin an output */
 NAMED(_output, "output");
-void output() { /* pinMode(pop(), OUTPUT); */ }
+void output() { /* pinMode(pop(), OUTPUT); */
+}
 
 /* make TOS pin an input with weak pullup */
 NAMED(_input_pullup, "input_pullup");
-void input_pullup() { /* pinMode(pop(), INPUT_PULLUP); */ }
-
-#define LIMIT_OUTER_ONE_EACH_ 0x1E00
-
-__code int j = 0x7e;
-
-int *jaddr = &j;
+void input_pullup() { /* pinMode(pop(), INPUT_PULLUP); */
+}
 
 void printZeds(int pvr) {
     if (pvr > 0xFFF) {
@@ -245,15 +275,14 @@ void dumpRAM() {
     char buffer[5] = "";
 
     char *ram;
-    ram = (char *)jaddr;
+    // ram = (char *)jaddr;
+    ram = (char *)ORG_ptr;
     serUSB_print("!");
     serUSB_flush();
     serUSB_print(" 0x");
     serUSB_flush();
 
     int pvr = (int)ram;
-
-    // vuln bulk for (int count = 9; count > 0; count--) { pvr++; }
 
     printZeds(pvr);
     serUSB_print_hex_int(pvr);
@@ -281,7 +310,8 @@ void dumpRAM() {
         serUSB_print_hex(c);
         serUSB_write(' ');
     }
-    ram = (char *)jaddr;
+    // ram = (char *)jaddr;
+    ram = (char *)ORG_ptr;
     serUSB_print("   ");
     for (uint8_t i = 0; i < 16; i++) {
         buffer[0] = *ram++;
@@ -291,24 +321,23 @@ void dumpRAM() {
         serUSB_print(buffer);
     }
     for (int iter = 8; iter > 0; iter--) {
-        jaddr++;
+        // jaddr++;
+        ORG_ptr++;
     }
 
-    ard_delay(23);
+    if (slower) {
+        ard_delay(23);
+    }
 
-    /* old int tested = (int)jaddr; */
-
-    /* trial 2210z */
     int tested = (int)ram;
 
-    if (tested > 0x3480) {
-        serUSB_println("   may be a DANGER  ");
-        serUSB_flush();
+    // if (tested > 0xFF) {
+    if (tested > 0x4000) {
         serUSB_println("");
-        serUSB_flush();
-        serUSB_println("   see: interpreter.c  LINE 295");
-        serUSB_flush();
-        serUSB_println("");
+        serUSB_print("    __code address 0x");
+        serUSB_print_hex_int(tested);
+        serUSB_println(" may be a DANGER  ");
+        SEE_LINE();
         serUSB_flush();
         while (-1) {
             ard_delay(2000);
@@ -408,7 +437,8 @@ uint8_t two_ahua_flg = 0;
 /* Incrementally read command line from serial port */
 /* byte reading() { */
 uint8_t reading() {
-    if (!serUSB_available()) return 1;
+    if (!serUSB_available())
+        return 1;
 
     ch = serUSB_read();
     // wrong: after a single backspace on an empty line
@@ -418,36 +448,49 @@ uint8_t reading() {
         counted = 6;
 
         for (int count = counted; count > 0; count--) {
-            serUSB_write(' '); serUSB_flush();
-            serUSB_write(BACKSPACE); serUSB_flush();
-            serUSB_write(BACKSPACE); serUSB_flush();
+            serUSB_write(' ');
+            serUSB_flush();
+            serUSB_write(BACKSPACE);
+            serUSB_flush();
+            serUSB_write(BACKSPACE);
+            serUSB_flush();
         }
-        serUSB_write(' '); serUSB_flush();
+        serUSB_write(' ');
+        serUSB_flush();
         ahua_flg = 0; // reset
     }
 
     if (ch == BACKSPACE) {
-        serUSB_write(' '); // oblit - was already echo_d so cursor is in right spot for this
+        serUSB_write(' '); // oblit - was already echo_d so cursor is in right
+                           // spot for this
         serUSB_flush();
         serUSB_write(BACKSPACE); // move cursor
         serUSB_flush();
         if (pos > 0) {
-            serUSB_write(BACKSPACE); serUSB_flush();
-            serUSB_write(' '); serUSB_flush();
-            serUSB_write(BACKSPACE); serUSB_flush();
+            serUSB_write(BACKSPACE);
+            serUSB_flush();
+            serUSB_write(' ');
+            serUSB_flush();
+            serUSB_write(BACKSPACE);
+            serUSB_flush();
             tib[--pos] = 0; // oblit captured char stored in tib
         }
         if (pos == 0) {
-            serUSB_write(BACKSPACE); serUSB_flush();
-            serUSB_write(' '); serUSB_flush();
-            serUSB_write(BACKSPACE); serUSB_flush();
-            serUSB_print(" ahua!"); serUSB_flush();
+            serUSB_write(BACKSPACE);
+            serUSB_flush();
+            serUSB_write(' ');
+            serUSB_flush();
+            serUSB_write(BACKSPACE);
+            serUSB_flush();
+            serUSB_print(" ahua!");
+            serUSB_flush();
             ahua_flg = -1;
         }
         return 1;
     }
 
-    serUSB_write(ch); serUSB_flush();
+    serUSB_write(ch);
+    serUSB_flush();
 
     if (ch == '\n')
         return 1;
@@ -476,7 +519,13 @@ void readword() {
     while (reading())
         ;
 
-    if (0) { serUSB_println(""); serUSB_flush(); serUSB_println("doubleEcho testing for a conditional, LINE: 431"); serUSB_println(""); serUSB_flush(); }
+    if (0) {
+        serUSB_println("");
+        serUSB_flush();
+        serUSB_println("doubleEcho testing for a conditional, LINE: 431");
+        serUSB_println("");
+        serUSB_flush();
+    }
 
     uint8_t doubleEcho = -1; /* 0 normal - use -1  for the ACTIVE state */
     if (doubleEcho) {
@@ -508,6 +557,18 @@ void runword() {
     /* serUSB_println("?"); */
 }
 
+void thing_bb() {
+
+    int iterations = 32;
+
+    for (int i = iterations; i > 0; i--) {
+        serUSB_flush();
+        rdumps();
+        serUSB_flush();
+        ard_delay(60);
+    }
+}
+
 void setupInterpreter() {
     ard_delay(3000);
     serUSB_println("");
@@ -533,41 +594,51 @@ void setupInterpreter() {
     serUSB_flush();
 
     for (int offset = (0x11C0 + 0xB); offset > 0; offset--) {
-        jaddr--;  // re-align
-    }
-
-
-    for (int offset = (0x10F + 0x4); offset > 0; offset--) {
-        jaddr--;  // re-align
+        jaddr--; // re-align
+        // ORG_ptr++; // re-align
+        // ORG_ptr--;
     }
 
     /* ard_delay(30); */
 
-    uint8_t switchedOn = 0; /* -1  ACTIVE state */
+    // uint8_t switchedOn = 0; /* -1  ACTIVE state */
+
+    uint8_t switchedOn = -1; /* -1  ACTIVE state */
 
     if (switchedOn) {
-        serUSB_println("  LINE 489:    switchedOn active");
+        SEE_LINE();
+        serUSB_println("   switchedOn active");
         serUSB_flush();
-        for (int i = 48; i > 0; i--) {
-            serUSB_flush();
-            rdumps();
-            serUSB_flush();
-            ard_delay(60);
+
+        for (int i = 2; i > 0; i--) {
+            thing_bb();
         }
     }
 }
 
 void Interpreter() {
-    // serUSB_println("  entering Interpreter..");
     serUSB_flush();
     readword();
     runword();
 }
 
-/*
+/**
+ *
+ * Sat 29 Jun 17:35:18 UTC 2024
  * Fri 28 Jun 16:46:02 UTC 2024
  * Thu 27 Jun 22:18:40 UTC 2024
  * Sun 23 Jun 11:30:54 UTC 2024
+ *
+ *
+ */
+
+/***
+ *
+ * Cannot yet do these things:
+ *
+ * strcpy(namebuf, dictionary[i].name);
+ *
+ *
  */
 
 /* end. */
