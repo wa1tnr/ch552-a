@@ -411,21 +411,12 @@ uint8_t reading() {
     if (!serUSB_available()) return 1;
 
     ch = serUSB_read();
+    // wrong: after a single backspace on an empty line
 
     if (ahua_flg) {
         int counted;
         counted = 6;
 
-        if (ch == BACKSPACE) {
-            two_ahua_flg = -1;
-        }
-
-        if (two_ahua_flg) {
-            serUSB_write(' '); serUSB_flush();
-        }
-        two_ahua_flg = 0; // reset
-
-        serUSB_write(BACKSPACE); serUSB_flush();
         for (int count = counted; count > 0; count--) {
             serUSB_write(' '); serUSB_flush();
             serUSB_write(BACKSPACE); serUSB_flush();
@@ -434,8 +425,6 @@ uint8_t reading() {
         serUSB_write(' '); serUSB_flush();
         ahua_flg = 0; // reset
     }
-    serUSB_write(ch);
-    serUSB_flush();
 
     if (ch == BACKSPACE) {
         serUSB_write(' '); // oblit - was already echo_d so cursor is in right spot for this
@@ -443,17 +432,22 @@ uint8_t reading() {
         serUSB_write(BACKSPACE); // move cursor
         serUSB_flush();
         if (pos > 0) {
+            serUSB_write(BACKSPACE); serUSB_flush();
+            serUSB_write(' '); serUSB_flush();
+            serUSB_write(BACKSPACE); serUSB_flush();
             tib[--pos] = 0; // oblit captured char stored in tib
         }
         if (pos == 0) {
-            // serUSB_write(' '); serUSB_flush();
-            // serUSB_write(BACKSPACE); serUSB_flush();
+            serUSB_write(BACKSPACE); serUSB_flush();
+            serUSB_write(' '); serUSB_flush();
+            serUSB_write(BACKSPACE); serUSB_flush();
             serUSB_print(" ahua!"); serUSB_flush();
             ahua_flg = -1;
         }
         return 1;
-
     }
+
+    serUSB_write(ch); serUSB_flush();
 
     if (ch == '\n')
         return 1;
