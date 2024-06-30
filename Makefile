@@ -8,7 +8,7 @@
 
 # https://stackoverflow.com/questions/13229071/pass-arguments-in-shell-script-from-a-makefile-and-get-back-the-results
 
-CURRENT=sketch_jun25a/sketch_jun25a
+CURRENT=sketch_jun30b
 # $(CURRENT)
 
 all:	clear_semaphores troubling
@@ -47,7 +47,7 @@ terminal:
 upload:
 	@cd $(CURRENT); $(MAKE) upload
 
-# @cd sketch_jun25a; $(MAKE) upload
+# @cd sketch_jun30b; $(MAKE) upload
 
 # @./upload.sh
 

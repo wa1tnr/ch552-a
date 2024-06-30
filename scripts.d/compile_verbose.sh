@@ -4,7 +4,7 @@
 
 # // #define __MULLONG_ASM_SMALL_AUTO__
 
-export LOCAL_ACLI_DIRECTOR_Y_PROJ_ECT="./sketch_jun25a/sketch_jun25a"
+export LOCAL_ACLI_DIRECTOR_Y_PROJ_ECT="./sketch_jun30b"
 
 prequel_a() {
     echo

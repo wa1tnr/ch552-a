@@ -1,6 +1,6 @@
 /* interpreter.c - Shattuck's Forth-like interpreter - port to CH552 8051 MCU */
 /* June, 2024 */
-
+#include <Arduino.h>
 #include <sdcc-lib.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -14,25 +14,28 @@
 #define LED_BUILTIN 33
 const int ledPin = LED_BUILTIN; // the number of the LED pin
 
-extern uint8_t serUSB_available();
-extern char serUSB_read();
-
-extern void serUSB_print_int(int i);
-extern void serUSB_print_hex_int(int i);
-extern void serUSB_write(char c);
-extern void serUSB_print_hex(char c);
-extern void serUSB_print(char *str);
-extern void serUSB_println(char *str);
-extern void serUSB_flush();
+#if 0
+extern uint8_t USBSerial_available();
+extern char USBSerial_read();
+extern void USBSerial_print_int(int i);
+extern void USBSerial_print_hex_int(int i);
+extern void USBSerial_write(char c);
+extern void USBSerial_print_hex(char c);
+extern void USBSerial_print(char *str);
+extern void USBSerial_println(char *str);
+extern void USBSerial_flush();
+#endif
 extern void ard_delay(int ms);
 
 #define LIMIT_OUTER_ONE_EACH_ 0x1E00
 
 #define SEE_LINE()                                                             \
-    serUSB_print("   see: interpreter.c  LINE ");                              \
-    serUSB_print_int(__LINE__);                                                \
-    serUSB_println("")
+    USBSerial_print("   see: interpreter.c  LINE ");                              \
+    USBSerial_print(__LINE__);                                                \
+    USBSerial_println("")
 
+
+uint8_t baseRadix = 10;
 uint8_t slowerThan = 0;
 
 __code int j = 0x7e;
@@ -174,17 +177,17 @@ void negate() { TOS = -(TOS); }
 /* destructively display top of stack, decimal */
 NAMED(_dot, ".");
 void dot() {
-    serUSB_print_int(pop());
-    serUSB_write(' ');
-    serUSB_flush();
+    USBSerial_print(pop());
+    USBSerial_write(' ');
+    USBSerial_flush();
 }
 
 /* destructively display top of stack, hex */
 NAMED(_dotHEX, ".h");
 void dotHEX() {
-    serUSB_print_hex_int(0xffff & pop());
-    serUSB_write(' ');
-    serUSB_flush();
+    USBSerial_print(0xffff & pop(), HEX);
+    USBSerial_write(' ');
+    USBSerial_flush();
 }
 
 /* display whole stack, hex */
@@ -252,20 +255,20 @@ void printZeds(int pvr) {
     if (pvr > 0xFFF) {
         return;
     }
-    serUSB_print("0"); // pad print job with leading zero
-    serUSB_flush();
+    USBSerial_print("0"); // pad print job with leading zero
+    USBSerial_flush();
     if (pvr > 0xFF) {
         return;
     }
     if (pvr < 0x100) {
-        serUSB_print("0");
-        serUSB_flush();
+        USBSerial_print("0");
+        USBSerial_flush();
         if (pvr > 0x0F) {
             return;
         }
     }
-    serUSB_print("0");
-    serUSB_flush();
+    USBSerial_print("0");
+    USBSerial_flush();
 }
 
 /* dump 16 bytes of RAM in hex with ascii on the side */
@@ -273,11 +276,11 @@ void dumpRAM() {
     char buffer[5] = "";
     char *ram;
     ram = (char *)ORG_ptr;
-    serUSB_print("!");
-    serUSB_print(" 0x");
+    USBSerial_print("!");
+    USBSerial_print(" 0x");
     int pvr = (int)ram;
     printZeds(pvr);
-    serUSB_print_hex_int(pvr);
+    USBSerial_print(pvr, HEX);
 
     /***********************
      *                     *
@@ -286,30 +289,30 @@ void dumpRAM() {
      *                     *
      ***********************/
 
-    serUSB_write(':');
-    serUSB_write(' ');
-    serUSB_print("   ");
+    USBSerial_write(':');
+    USBSerial_write(' ');
+    USBSerial_print("   ");
 
     /* individual hex 2-digit groups l to r */
     for (uint8_t i = 0; i < 16; i++) {
         char c = *ram++;
         c = c & 0xff;
         if (c < 0x10) {
-            serUSB_print("0"); // padding
+            USBSerial_print("0"); // padding
         }
-        serUSB_print_hex(c);
-        serUSB_write(' ');
-        serUSB_flush();
+        USBSerial_print(c, HEX);
+        USBSerial_write(' ');
+        USBSerial_flush();
     }
     ram = (char *)ORG_ptr;
-    serUSB_print("   ");
+    USBSerial_print("   ");
     for (uint8_t i = 0; i < 16; i++) {
         buffer[0] = *ram++;
         if (buffer[0] > 0x7f || buffer[0] < ' ')
             buffer[0] = '.';
         buffer[1] = '\0';
-        serUSB_print(buffer);
-        serUSB_flush();
+        USBSerial_print(buffer);
+        USBSerial_flush();
     }
     for (int iter = 8; iter > 0; iter--) {
         ORG_ptr++;
@@ -322,16 +325,16 @@ void dumpRAM() {
     int tested = (int)ram;
 
     if (tested > 0x4000) {
-        serUSB_println("");
-        serUSB_print("    __code address 0x");
-        serUSB_print_hex_int(tested);
-        serUSB_println(" may be a DANGER  ");
+        USBSerial_println("");
+        USBSerial_print("    __code address 0x");
+        USBSerial_print(tested, HEX);
+        USBSerial_println(" may be a DANGER  ");
         SEE_LINE();
-        serUSB_flush();
+        USBSerial_flush();
         while (-1) {
             ard_delay(2000);
-            serUSB_write('.');
-            serUSB_flush();
+            USBSerial_write('.');
+            USBSerial_flush();
         }
     }
 }
@@ -340,11 +343,11 @@ void dumpRAM() {
 NAMED(_dumpr, "dump");
 void rdumps() {
     for (uint8_t i = 0; i < 16; i++) {
-        serUSB_println("");
+        USBSerial_println("");
         dumpRAM();
     }
-    serUSB_println("");
-    serUSB_flush();
+    USBSerial_println("");
+    USBSerial_flush();
 }
 
 /* End of Forth interpreter words */
@@ -389,8 +392,8 @@ const int entries = sizeof dictionary / sizeof dictionary[0];
 void words() {
     for (int i = entries - 1; i >= 0; i--) {
         strcpy(namebuf, dictionary[i].name);
-        serUSB_print(namebuf);
-        serUSB_write(' ');
+        USBSerial_print(namebuf);
+        USBSerial_write(' ');
     }
 }
 
@@ -416,13 +419,27 @@ int isNumber() {
     return 1;
 }
 
+const char hexDigits[] = "0123456789abcdef";
+
 int atoiLocal(char __xdata *str) {
+    SEE_LINE();
     int i;
     int res = 0;
 
+    // const char* p = *hexDigits;
+    const char* p = (const char *) hexDigits;
+
+    USBSerial_println_s(p);
+
+    for (uint8_t j = 0; hexDigits[j] != 0; j++) {
+        USBSerial_print(" n: ");
+        USBSerial_print(j); // but why
+        USBSerial_flush();
+        // USBSerial_print(j);
+    }
+
     for (i = 0; str[i] != 0; ++i)
         res = res * 10 + str[i] - '0';
-
     return res;
 }
 
@@ -433,8 +450,8 @@ int number() {
     ram = (char *)tibPtr;
     int n = *ram;
     int nmbr = atoiLocal((char __xdata *)tib);
-    serUSB_println("DARMOK and Gilad at Tenagra!");
-    serUSB_flush();
+    // USBSerial_println("DARMOK and Gilad at Tenagra!");
+    // USBSerial_flush();
     return nmbr;
 }
 
@@ -454,10 +471,10 @@ uint8_t two_ahua_flg = 0;
 /* Incrementally read command line from serial port */
 /* byte reading() { */
 uint8_t reading() {
-    if (!serUSB_available())
+    if (!USBSerial_available())
         return 1;
 
-    ch = serUSB_read();
+    ch = USBSerial_read();
     // wrong: after a single backspace on an empty line
 
     if (ahua_flg) {
@@ -465,54 +482,54 @@ uint8_t reading() {
         counted = 6;
 
         for (int count = counted; count > 0; count--) {
-            serUSB_write(' ');
-            serUSB_flush();
-            serUSB_write(BACKSPACE);
-            serUSB_flush();
-            serUSB_write(BACKSPACE);
-            serUSB_flush();
+            USBSerial_write(' ');
+            USBSerial_flush();
+            USBSerial_write(BACKSPACE);
+            USBSerial_flush();
+            USBSerial_write(BACKSPACE);
+            USBSerial_flush();
         }
-        serUSB_write(' ');
-        serUSB_flush();
+        USBSerial_write(' ');
+        USBSerial_flush();
         ahua_flg = 0; // reset
     }
 
     if (ch == BACKSPACE) {
-        serUSB_write(' ');
-        serUSB_flush();
-        serUSB_write(BACKSPACE);
-        serUSB_flush();
+        USBSerial_write(' ');
+        USBSerial_flush();
+        USBSerial_write(BACKSPACE);
+        USBSerial_flush();
         if (pos > 0) {
-            serUSB_write(BACKSPACE);
-            serUSB_flush();
-            serUSB_write(' ');
-            serUSB_flush();
-            serUSB_write(BACKSPACE);
-            serUSB_flush();
+            USBSerial_write(BACKSPACE);
+            USBSerial_flush();
+            USBSerial_write(' ');
+            USBSerial_flush();
+            USBSerial_write(BACKSPACE);
+            USBSerial_flush();
             tib[--pos] = 0; // obliterate
         }
         if (pos == 0) {
-            serUSB_write(BACKSPACE);
-            serUSB_flush();
-            serUSB_write(' ');
-            serUSB_flush();
-            serUSB_write(BACKSPACE);
-            serUSB_flush();
-            serUSB_print(" ahua!");
-            serUSB_flush();
+            USBSerial_write(BACKSPACE);
+            USBSerial_flush();
+            USBSerial_write(' ');
+            USBSerial_flush();
+            USBSerial_write(BACKSPACE);
+            USBSerial_flush();
+            USBSerial_print(" ahua!");
+            USBSerial_flush();
             ahua_flg = 1;
         }
         return 1;
     }
 
-    serUSB_write(ch);
-    serUSB_flush();
+    USBSerial_write(ch);
+    USBSerial_flush();
 
     if (ch == '\n')
         return 1;
     if (ch == '\r') {
-        serUSB_write('\n');
-        serUSB_flush();
+        USBSerial_write('\n');
+        USBSerial_flush();
         return 0;
     }
 
@@ -529,7 +546,7 @@ uint8_t reading() {
 /* Block on reading the command line from serial port */
 /* then echo each word */
 void readword() {
-    serUSB_flush();
+    USBSerial_flush();
     pos = 0;
     tib[0] = 0;
     while (reading())
@@ -547,17 +564,17 @@ void runword() {
     if (isNumber()) {
         int nbr = number();
 
-        serUSB_print(" show what number() has for us: ");
-        serUSB_print_hex_int(nbr);
-        serUSB_print("  <-- nbr ");
-        serUSB_println("");
-        serUSB_flush();
+        USBSerial_print(" hex: ");
+        USBSerial_print(nbr, HEX);
+        USBSerial_print("  <-- number, HEX");
+        USBSerial_println("");
+        USBSerial_flush();
 
         push(nbr);
         ok();
         return;
     }
-    /* serUSB_println("?"); */
+    /* USBSerial_println("?"); */
 }
 
 void thing_bb() {
@@ -565,27 +582,40 @@ void thing_bb() {
     int iterations = 2; // 32
 
     for (int i = iterations; i > 0; i--) {
-        serUSB_flush();
+        USBSerial_flush();
         rdumps();
-        serUSB_flush();
+        USBSerial_flush();
         ard_delay(60);
     }
 }
 
+
+void base(uint8_t radix) {
+    baseRadix = radix;
+}
+
 void setupInterpreter() {
+    SEE_LINE();
+    USBSerial_println("I am inside setupInterpreter()");
+    // conclusion: no need for USBSerial_foo() wrappers
+    // however, must have this in a C (not C++ here)
+    // source file (such as the present interpeter.c
+    // file):
+    // #include <Arduino.h>
+    USBSerial_flush();
     ard_delay(500);
-    serUSB_println("");
-    serUSB_flush();
+    USBSerial_println("");
+    USBSerial_flush();
     ard_delay(500);
 
     char c = ' ';
-    serUSB_write(c);
+    USBSerial_write(c);
     c = ' ';
-    serUSB_write(c);
-    serUSB_println(" jasper wy Forth-like interpreter:");
+    USBSerial_write(c);
+    USBSerial_println(" jasper wy Forth-like interpreter:");
     words();
-    serUSB_println("");
-    serUSB_flush();
+    USBSerial_println("");
+    USBSerial_flush();
 
     for (int offset = (0x11C0 + 0xB); offset > 0; offset--) {
         jaddr--; // re-align
@@ -595,8 +625,8 @@ void setupInterpreter() {
 
     if (switchedOn) {
         SEE_LINE();
-        serUSB_println("   switchedOn active");
-        serUSB_flush();
+        USBSerial_println("   switchedOn active");
+        USBSerial_flush();
 
         for (int i = 2; i > 0; i--) {
             thing_bb();
@@ -605,7 +635,7 @@ void setupInterpreter() {
 }
 
 void Interpreter() {
-    serUSB_flush();
+    USBSerial_flush();
     readword();
     runword();
 }
@@ -628,3 +658,5 @@ void Interpreter() {
  */
 
 /* end. */
+
+// uint8_t baseRadix = 10;
