@@ -6,26 +6,13 @@
  **********************                 ****************************
  **********************   w a n t e d   ****************************
  **********************                 ****************************
- **********************                 ****************************
  ******************************************************************* */
 
 /*
- *    wanted:   wrappers.  Anything provided by the .ino
- *              that does not 'work' in interpreter.c in an
- *              obvious way.
- *
- *              Commented out, for example, all Serial.print()
- *              uses.  A simple wrapper may solve that neatly.
  *
  */
 
 #define LED_BUILTIN 16
-// #define __MULLONG_ASM_SMALL_AUTO__
-
-/* char __data buffer[64]; */
-
-/* char *__data bufPtr; */
-/* char *__data */
 
 /*
 
@@ -40,52 +27,6 @@ In your user settings (File > Preferences > Settings), add the following:
 fzf
 */
 
-/* void putLine(char *buffer) { */
-/* void putLine() { */
-/* void putLine(__data char * buffer) { */
-/* void putLine(__data char * buffer) { */
-
-/* USBSerial_println(buffer); */
-
-/* USBSerial_print(buffer); */
-/* USBSerial_print("frank in sense"); */
-/* USBSerial_print(*buffer); */
-
-/* void testPutLine() { */
-/*
-    GOOD: bufPtr = * buffer;
-          bufPtr = buffer;
-          {
-          bufPtr = (char *__data) buffer;
-          USBSerial_println(buffer);
-          }
-*/
-
-/*
-    BAD: bufPtr = & buffer;
-          {
-          bufPtr = (char *__data) buffer;
-          USBSerial_println(bufPtr);
-          }
-*/
-
-/*
-  bufPtr = (char *__data) buffer;
-*/
-/* compiles clean but cannot find how to use it here for this task */
-
-/*
-  USBSerial_println(buffer);
-  */
-
-/* USBSerial_println(buffer); */
-/* USBSerial_println(bufPtr); */
-/* snprintf(buffer, sizeof buffer, "%s", "abcde"); */
-
-/*
-}
-*/
-
 /*
  *  refs
  *    Stefan Wagner
@@ -95,8 +36,6 @@ fzf
  *      https://github.com/wagiminator/CH552-USB-OLED/blob/main/software/cdc_oled_terminal/src/oled_term.c#L161-L197
  *    Thank you.
  */
-
-// void flushing_ny() {
 
 void ard_delay(int ms) { delay(ms); }
 
@@ -126,7 +65,6 @@ void serUSB_write(char c) {
     c = c & 0x7F; // ignore top bit
     if (c > 254)
         return;
-
     if ((c > 31) || (c == '\r') || (c == '\n') || (c == '\010')) {
         USBSerial_write(c);
     }
@@ -142,12 +80,7 @@ void serUSB_print(char *str) {
 void serUSB_println(char *str) {
     serUSB_print(str);
     serUSB_write('\n');
-    // serUSB_write('\n');
 }
-
-// void serUSB_write(char c);        // serUSB write a character or handle
-// control characters void serUSB_print(char* str);     // serUSB print string
-// void serUSB_println(char* str);   // serUSB print string with newline
 
 void slowerE() {
     for (int p = 250; p > 0; p--) {
@@ -180,16 +113,9 @@ void slower() {
     }
 }
 
-// extern void setupInterpreter();
-// extern void Interpreter();
+void msg_longstars() { serUSB_println("   * * * * * * * *"); }
 
-void msg_longstars() {
-    serUSB_println("   * * * * * * * *");
-}
-
-void msg_starframed() {
-    serUSB_println("   * * *       * * *");
-}
+void msg_starframed() { serUSB_println("   * * *       * * *"); }
 
 void print_cool_things(int count) {
     serUSB_println("darmok and gilad at tenagra eyes open 8051 pbrsgng.. ");
@@ -244,11 +170,8 @@ extern void Interpreter();
 
 void setup() {
     delay(4000);
-    // USBSerial_println(" running setupInterpreter below:");
     delay(1000);
     setupInterpreter();
-    // delay(8000);
-    // do_cool_things();
 }
 
 void loop() { Interpreter(); }

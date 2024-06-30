@@ -3,8 +3,8 @@
 
 #include <sdcc-lib.h>
 #include <stdint.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 /***
  *
@@ -175,14 +175,16 @@ void negate() { TOS = -(TOS); }
 NAMED(_dot, ".");
 void dot() {
     serUSB_print_int(pop());
-    serUSB_write(' '); serUSB_flush();
+    serUSB_write(' ');
+    serUSB_flush();
 }
 
 /* destructively display top of stack, hex */
 NAMED(_dotHEX, ".h");
 void dotHEX() {
     serUSB_print_hex_int(0xffff & pop());
-    serUSB_write(' '); serUSB_flush();
+    serUSB_write(' ');
+    serUSB_flush();
 }
 
 /* display whole stack, hex */
@@ -201,9 +203,7 @@ void dotS() {
 
 /* delay TOS # of milliseconds */
 NAMED(_delay, "delay");
-void del() { 
-    ard_delay(pop());
-}
+void del() { ard_delay(pop()); }
 
 /* Toggle pin at TOS and delay(spd), repeat... */
 NAMED(_wiggle, "wiggle");
@@ -367,6 +367,7 @@ void nop() {}
 NAMED(_words, "words");
 void words();
 
+// clang-format off
 /* table of names and function addresses in flash */
 const entry dictionary[] = {
     {_nopp, nopp},
@@ -379,6 +380,7 @@ const entry dictionary[] = {
     {_high, high},     {_low, low},       {_in, in},
     {_input, input},   {_output, output}, {_input_pullup, input_pullup},
     {_wiggle, wiggle}, {_dumpr, rdumps},  {_speed, speed}};
+// clang-format on
 
 /* Number of words in the dictionary */
 const int entries = sizeof dictionary / sizeof dictionary[0];
@@ -407,14 +409,16 @@ int locate() {
 int isNumber() {
     char *endptr;
     strtol(tib, &endptr, 0);
-    if (endptr == tib) return 0;
-    if (*endptr != '\0') return 0;
+    if (endptr == tib)
+        return 0;
+    if (*endptr != '\0')
+        return 0;
     return 1;
 }
 
 int atoiLocal(char __xdata *str) {
-	int i;
-	int res = 0;
+    int i;
+    int res = 0;
 
     for (i = 0; str[i] != 0; ++i)
         res = res * 10 + str[i] - '0';
@@ -424,11 +428,11 @@ int atoiLocal(char __xdata *str) {
 
 /* Convert number in tib */
 int number() {
-    char* ram;
-    char* __xdata tibPtr = (char*) &tib;
+    char *ram;
+    char *__xdata tibPtr = (char *)&tib;
     ram = (char *)tibPtr;
     int n = *ram;
-    int nmbr = atoiLocal((char __xdata *) tib);
+    int nmbr = atoiLocal((char __xdata *)tib);
     serUSB_println("DARMOK and Gilad at Tenagra!");
     serUSB_flush();
     return nmbr;
@@ -624,4 +628,3 @@ void Interpreter() {
  */
 
 /* end. */
-
