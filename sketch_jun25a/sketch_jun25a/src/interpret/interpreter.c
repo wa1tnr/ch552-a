@@ -1,33 +1,15 @@
 /* interpreter.c - Shattuck's Forth-like interpreter - port to CH552 8051 MCU */
 /* June, 2024 */
 
-// #define __MULLONG_ASM_SMALL_AUTO__
-// # defined(_MULLONG_ASM_SMALL_AUTO)
-
-// might help sdcc-lib.h -- might select right variant
-// or mcs51 specific header not yet included
-
-// result - no help from sdcc-lib.h so far
-
-// alligator
 #include <sdcc-lib.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+
 /***
  *
  *
- * include <string.h>
- *
- *   strcpy
- *
- *
- * include <stdlib.h>
- *
- *   extern long int strtol(const char *nptr, char **endptr, int base);
- *
  */
-
 
 #define LED_BUILTIN 33
 const int ledPin = LED_BUILTIN; // the number of the LED pin
@@ -35,7 +17,6 @@ const int ledPin = LED_BUILTIN; // the number of the LED pin
 extern uint8_t serUSB_available();
 extern char serUSB_read();
 
-// extern void serUSB_print_long(long i);
 extern void serUSB_print_int(int i);
 extern void serUSB_print_hex_int(int i);
 extern void serUSB_write(char c);
@@ -58,19 +39,6 @@ __code int j = 0x7e;
 
 // cannot do anything here - likely is boot area:
 __code __at(0x0) char ORG;
-
-// __code __at (0x0) char ORG[64] = "seasons don't fear the reaper .. Nor do the
-// wind, the sun or the rain";
-
-// __code char smallORG[72] =
-//    "seasons don't fear the reaper .. Nor do the wind, the sun or the rain";
-//  [72] =
-//  "123456781234567812345678123456781234567812345678123456781234567812345678"
-//  [72] = "       8      16      24      32      40      48      56      64 72"
-//  [80] =
-//  "12345678123456781234567812345678123456781234567812345678123456781234567812345678"
-//  [80] = "       8      16      24      32      40      48      56      64 72
-//  80"
 
 int *ORG_ptr = &ORG; // okay for reading only
 int *jaddr = &j;
@@ -148,8 +116,8 @@ void dup() { push(TOS); }
 /* exchange top two stack items */
 NAMED(_swap, "swap");
 void swap() {
-    uint8_t a;
-    uint8_t b;
+    int a;
+    int b;
     a = pop();
     b = pop();
     push(a);
@@ -159,8 +127,8 @@ void swap() {
 /* copy second on stack to top */
 NAMED(_over, "over");
 void over() {
-    uint8_t a;
-    uint8_t b;
+    int a;
+    int b;
     a = pop();
     b = pop();
     push(b);
@@ -170,28 +138,28 @@ void over() {
 /* add top two items */
 NAMED(_add, "+");
 void add() {
-    uint8_t a = pop();
+    int a = pop();
     TOS = a + TOS;
 }
 
 /* bitwise and top two items */
 NAMED(_and, "and");
 void and_() {
-    uint8_t a = pop();
+    int a = pop();
     TOS = a & TOS;
 }
 
 /* inclusive or top two items */
 NAMED(_or, "or");
 void or_() {
-    uint8_t a = pop();
+    int a = pop();
     TOS = a | TOS;
 }
 
 /* exclusive or top two items */
 NAMED(_xor, "xor");
 void xor_() {
-    uint8_t a = pop();
+    int a = pop();
     TOS = a ^ TOS;
 }
 
@@ -208,18 +176,13 @@ NAMED(_dot, ".");
 void dot() {
     serUSB_print_int(pop());
     serUSB_write(' '); serUSB_flush();
-    /* Serial.print(pop()); */
-    /* Serial.print(" "); */
 }
 
 /* destructively display top of stack, hex */
 NAMED(_dotHEX, ".h");
 void dotHEX() {
-    // serUSB_print_hex_int(0xffff & pop(), HEX);
     serUSB_print_hex_int(0xffff & pop());
     serUSB_write(' '); serUSB_flush();
-    /* Serial.print(0xffff & pop(), HEX); */
-    /* Serial.print(" "); */
 }
 
 /* display whole stack, hex */
@@ -238,7 +201,8 @@ void dotS() {
 
 /* delay TOS # of milliseconds */
 NAMED(_delay, "delay");
-void del() { /* delay(pop()); */
+void del() { 
+    ard_delay(pop());
 }
 
 /* Toggle pin at TOS and delay(spd), repeat... */
@@ -307,15 +271,11 @@ void printZeds(int pvr) {
 /* dump 16 bytes of RAM in hex with ascii on the side */
 void dumpRAM() {
     char buffer[5] = "";
-
     char *ram;
-    // ram = (char *)jaddr;
     ram = (char *)ORG_ptr;
     serUSB_print("!");
     serUSB_print(" 0x");
-
     int pvr = (int)ram;
-
     printZeds(pvr);
     serUSB_print_hex_int(pvr);
 
@@ -341,7 +301,6 @@ void dumpRAM() {
         serUSB_write(' ');
         serUSB_flush();
     }
-    // ram = (char *)jaddr;
     ram = (char *)ORG_ptr;
     serUSB_print("   ");
     for (uint8_t i = 0; i < 16; i++) {
@@ -353,7 +312,6 @@ void dumpRAM() {
         serUSB_flush();
     }
     for (int iter = 8; iter > 0; iter--) {
-        // jaddr++;
         ORG_ptr++;
     }
 
@@ -363,7 +321,6 @@ void dumpRAM() {
 
     int tested = (int)ram;
 
-    // if (tested > 0xFF) {
     if (tested > 0x4000) {
         serUSB_println("");
         serUSB_print("    __code address 0x");
@@ -443,8 +400,6 @@ int locate() {
             return i;
         }
     }
-    // serUSB_println("  locate() returns zero.");
-    // serUSB_flush();
     return 0;
 }
 
@@ -467,8 +422,6 @@ int atoiLocal(char __xdata *str) {
     return res;
 }
 
-// extern int atoi (const char *nptr);
-
 /* Convert number in tib */
 int number() {
     char* ram;
@@ -481,28 +434,11 @@ int number() {
     return nmbr;
 }
 
-#if 0
-/* Is the word in tib a number? */
-int isNumber() {
-  char *endptr;
-  strtol(tib, &endptr, 0);
-  if (endptr == tib) return 0;
-  if (*endptr != '\0') return 0;
-  return 1;
-}
-
-/* Convert number in tib */
-int number() {
-  char *endptr;
-  return (int) strtol(tib, &endptr, 0);
-}
-#endif
-
 char ch;
 
 void ok() {
     if (ch == '\r')
-        return; /* NO RETURN it is this instead: Serial.println("ok"); */
+        return;
 }
 
 #define BACKSPACE '\010'
@@ -538,10 +474,9 @@ uint8_t reading() {
     }
 
     if (ch == BACKSPACE) {
-        serUSB_write(' '); // oblit - was already echo_d so cursor is in right
-                           // spot for this
+        serUSB_write(' ');
         serUSB_flush();
-        serUSB_write(BACKSPACE); // move cursor
+        serUSB_write(BACKSPACE);
         serUSB_flush();
         if (pos > 0) {
             serUSB_write(BACKSPACE);
@@ -550,7 +485,7 @@ uint8_t reading() {
             serUSB_flush();
             serUSB_write(BACKSPACE);
             serUSB_flush();
-            tib[--pos] = 0; // oblit captured char stored in tib
+            tib[--pos] = 0; // obliterate
         }
         if (pos == 0) {
             serUSB_write(BACKSPACE);
@@ -561,7 +496,7 @@ uint8_t reading() {
             serUSB_flush();
             serUSB_print(" ahua!");
             serUSB_flush();
-            ahua_flg = 1; // or use a signed int
+            ahua_flg = 1;
         }
         return 1;
     }
@@ -572,7 +507,7 @@ uint8_t reading() {
     if (ch == '\n')
         return 1;
     if (ch == '\r') {
-        serUSB_write('\n'); // or no linefeed here
+        serUSB_write('\n');
         serUSB_flush();
         return 0;
     }
@@ -595,33 +530,10 @@ void readword() {
     tib[0] = 0;
     while (reading())
         ;
-
-    if (0) {
-        serUSB_println("");
-        serUSB_flush();
-        serUSB_println("doubleEcho testing for a conditional, LINE: 431");
-        serUSB_println("");
-        serUSB_flush();
-    }
-
-    uint8_t doubleEcho = 0; /* 0 normal - use -1  for the ACTIVE state */
-    if (doubleEcho) {
-        serUSB_flush();
-        serUSB_print(" backspace_testing_tib: ");
-        serUSB_flush();
-        serUSB_print(tib);
-        serUSB_flush();
-        serUSB_print(" :end_tib ");
-        serUSB_flush();
-        serUSB_print(" ");
-        serUSB_flush();
-    }
 }
 
 /* Run a word via its name */
 void runword() {
-    serUSB_println("  - - - runword():  - - -");
-    serUSB_flush();
     int place = locate();
     if (place != 0) {
         dictionary[place].function();
@@ -631,15 +543,12 @@ void runword() {
     if (isNumber()) {
         int nbr = number();
 
-        // SEE_LINE();
         serUSB_print(" show what number() has for us: ");
-        // serUSB_print_int(nbr);
         serUSB_print_hex_int(nbr);
         serUSB_print("  <-- nbr ");
         serUSB_println("");
         serUSB_flush();
 
-        // push(number());
         push(nbr);
         ok();
         return;
@@ -661,37 +570,22 @@ void thing_bb() {
 
 void setupInterpreter() {
     ard_delay(500);
-    // serUSB_println("");
-    // serUSB_println("");
-    // serUSB_println("");
-    // serUSB_flush();
-    serUSB_println("");
-    // serUSB_println("  aye bee cee dee eee eff gee ach eye jay kay ell emm enn "
-    //               "ohh pee que are ess tee you vee");
-    // serUSB_println("");
-    // serUSB_println("");
     serUSB_println("");
     serUSB_flush();
     ard_delay(500);
 
-    char c = 'b';
+    char c = ' ';
     serUSB_write(c);
     c = ' ';
     serUSB_write(c);
-    serUSB_println("Forth-like interpreter:");
+    serUSB_println(" jasper wy Forth-like interpreter:");
     words();
     serUSB_println("");
     serUSB_flush();
 
     for (int offset = (0x11C0 + 0xB); offset > 0; offset--) {
         jaddr--; // re-align
-        // ORG_ptr++; // re-align
-        // ORG_ptr--;
     }
-
-    /* ard_delay(30); */
-
-    // uint8_t switchedOn = 0; /* -1  ACTIVE state */
 
     uint8_t switchedOn = 0; /* -1  ACTIVE state */
 
@@ -714,6 +608,7 @@ void Interpreter() {
 
 /**
  *
+ * Sun 30 Jun 03:45:04 UTC 2024
  * Sat 29 Jun 17:35:18 UTC 2024
  * Fri 28 Jun 16:46:02 UTC 2024
  * Thu 27 Jun 22:18:40 UTC 2024
@@ -724,11 +619,9 @@ void Interpreter() {
 
 /***
  *
- * Cannot yet do these things:
  *
- * strcpy(namebuf, dictionary[i].name);
  *
- * TODO: strcpy in the sdcc PDF
  */
 
 /* end. */
+
