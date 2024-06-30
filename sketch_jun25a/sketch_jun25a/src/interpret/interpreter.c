@@ -113,21 +113,13 @@ uint8_t pos;
 /* push n to top of data stack */
 void push(int n) {
     p = (p + 1) & STKMASK;
-    serUSB_print("  push(n)  has received: ");
-    serUSB_print_hex_int(n); serUSB_println(""); serUSB_flush();
     TOS = n;
 }
 
 /* return top of stack */
 int pop() {
     int n = TOS;
-    serUSB_print("  pop harvested n: ");
-    serUSB_print_int(n);
-    serUSB_flush();
     p = (p - 1) & STKMASK;
-    serUSB_println("  pop()  will return: ");
-    serUSB_print_int(n);
-    serUSB_flush();
     return n;
 }
 
@@ -448,10 +440,6 @@ int locate() {
     for (int i = entries; i >= 0; i--) {
         strcpy(namebuf, dictionary[i].name);
         if (!strcmp(tib, namebuf)) {
-            serUSB_print("  locate() returns: ");
-            serUSB_print_int(i);
-            serUSB_println("");
-            serUSB_flush();
             return i;
         }
     }
@@ -487,24 +475,11 @@ int number() {
     char* __xdata tibPtr = (char*) &tib;
     ram = (char *)tibPtr;
     int n = *ram;
-    // const char *endptr; SEE_LINE();
-    // char __xdata tibPtr = (char) &tib[0];
-
-    // char* tibPtrPtr = (char*) tibPtr;
-// int *ORG_ptr = &ORG; // okay for reading only
-    // char *endptr; SEE_LINE();
-    // endptr = &tib;
-    // int nmbr = atoi(&tibPtr);
-    // int nmbr =  (int) atoiLocal(&tibPtr);
-    // int* nmbrPtr = (int *) atoiLocal(&tibPtr);
-    // int* nmbrPtr = (int *) atoiLocal(*ram);
-    // int nmbr = *nmbrPtr;
-    // int nmbr = nmbrPtr;
-    int nmbr=n;
+    int nmbr = atoiLocal((char __xdata *) tib);
+    serUSB_println("DARMOK and Gilad at Tenagra!");
+    serUSB_flush();
     return nmbr;
-    // return (int) strtol(tib, &endptr, 0);
 }
-
 
 #if 0
 /* Is the word in tib a number? */
