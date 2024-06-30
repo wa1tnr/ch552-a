@@ -113,9 +113,8 @@ uint8_t pos;
 /* push n to top of data stack */
 void push(int n) {
     p = (p + 1) & STKMASK;
-    serUSB_println("");
     serUSB_print("  push(n)  has received: ");
-    serUSB_print_int(n); serUSB_println(""); serUSB_flush();
+    serUSB_print_hex_int(n); serUSB_println(""); serUSB_flush();
     TOS = n;
 }
 
@@ -456,8 +455,8 @@ int locate() {
             return i;
         }
     }
-    serUSB_println("  locate() returns zero.");
-    serUSB_flush();
+    // serUSB_println("  locate() returns zero.");
+    // serUSB_flush();
     return 0;
 }
 
@@ -657,7 +656,7 @@ void runword() {
     if (isNumber()) {
         int nbr = number();
 
-        SEE_LINE();
+        // SEE_LINE();
         serUSB_print(" show what number() has for us: ");
         // serUSB_print_int(nbr);
         serUSB_print_hex_int(nbr);
