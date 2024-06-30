@@ -425,6 +425,7 @@ int atoiLocal(char __xdata *str) {
     SEE_LINE();
     int i;
     int res = 0;
+    int resh = 0;
 
     // const char* p = *hexDigits;
     const char* p = (const char *) hexDigits;
@@ -433,12 +434,37 @@ int atoiLocal(char __xdata *str) {
 
     for (uint8_t j = 0; hexDigits[j] != 0; j++) {
         USBSerial_print(" n: ");
-        USBSerial_print(j); // but why
+        USBSerial_print(j); // but why - it is an index into an arbitrary character set
+        USBSerial_write('>');
+        USBSerial_flush();
+        char ptr = hexDigits[j];
+        // char hDig = ptr;
+        // USBSerial_print(hDig);
+        USBSerial_print(ptr);
+        USBSerial_write('<');
         USBSerial_flush();
         // USBSerial_print(j);
     }
 
+    // hexDigits[j] holds a character
+
+        // str[i] gives left to right  -  code lifted outside source
+
+        // str must be <thing> then
+
+        //  1BC = 444
+
+        //  256 + 176 + 12
+
+        //     1     B     C
+        //  0001  1011  1100
+        //  0001  0000  0000    256
+        //  0000  1011  0000    176
+        //  0000  0000  1100     12
+
     for (i = 0; str[i] != 0; ++i)
+        resh = resh * 16 + str[i] - '0'; // no of course  
+
         res = res * 10 + str[i] - '0';
     return res;
 }
