@@ -1,7 +1,19 @@
 /* interpreter.c - Shattuck's Forth-like interpreter - port to CH552 8051 MCU */
 /* June, 2024 */
 
+// #define __MULLONG_ASM_SMALL_AUTO__
+// # defined(_MULLONG_ASM_SMALL_AUTO)
+
+// might help sdcc-lib.h -- might select right variant
+// or mcs51 specific header not yet included
+
+// result - no help from sdcc-lib.h so far
+
+// alligator
+#include <sdcc-lib.h>
 #include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
 /***
  *
  *
@@ -16,8 +28,6 @@
  *
  */
 
-#include <string.h>
-#include <stdlib.h>
 
 #define LED_BUILTIN 33
 const int ledPin = LED_BUILTIN; // the number of the LED pin
@@ -25,6 +35,7 @@ const int ledPin = LED_BUILTIN; // the number of the LED pin
 extern uint8_t serUSB_available();
 extern char serUSB_read();
 
+// extern void serUSB_print_long(long i);
 extern void serUSB_print_int(int i);
 extern void serUSB_print_hex_int(int i);
 extern void serUSB_write(char c);
@@ -41,7 +52,7 @@ extern void ard_delay(int ms);
     serUSB_print_int(__LINE__);                                                \
     serUSB_println("")
 
-uint8_t slower = 0;
+uint8_t slowerThan = 0;
 
 __code int j = 0x7e;
 
@@ -51,8 +62,8 @@ __code __at(0x0) char ORG;
 // __code __at (0x0) char ORG[64] = "seasons don't fear the reaper .. Nor do the
 // wind, the sun or the rain";
 
-__code char smallORG[72] =
-    "seasons don't fear the reaper .. Nor do the wind, the sun or the rain";
+// __code char smallORG[72] =
+//    "seasons don't fear the reaper .. Nor do the wind, the sun or the rain";
 //  [72] =
 //  "123456781234567812345678123456781234567812345678123456781234567812345678"
 //  [72] = "       8      16      24      32      40      48      56      64 72"
@@ -81,7 +92,7 @@ typedef struct {
    Number of items must be a power of 2 */
 const uint8_t STKSIZE = 8;
 const uint8_t STKMASK = 7;
-uint8_t stack[8];
+int stack[8];
 int p = 0;
 
 /* TOS is Top Of Stack */
@@ -102,13 +113,22 @@ uint8_t pos;
 /* push n to top of data stack */
 void push(int n) {
     p = (p + 1) & STKMASK;
+    serUSB_println("");
+    serUSB_print("  push(n)  has received: ");
+    serUSB_print_int(n); serUSB_println(""); serUSB_flush();
     TOS = n;
 }
 
 /* return top of stack */
 int pop() {
     int n = TOS;
+    serUSB_print("  pop harvested n: ");
+    serUSB_print_int(n);
+    serUSB_flush();
     p = (p - 1) & STKMASK;
+    serUSB_println("  pop()  will return: ");
+    serUSB_print_int(n);
+    serUSB_flush();
     return n;
 }
 
@@ -195,6 +215,8 @@ void negate() { TOS = -(TOS); }
 /* destructively display top of stack, decimal */
 NAMED(_dot, ".");
 void dot() {
+    serUSB_print_int(pop());
+    serUSB_write(' '); serUSB_flush();
     /* Serial.print(pop()); */
     /* Serial.print(" "); */
 }
@@ -202,6 +224,9 @@ void dot() {
 /* destructively display top of stack, hex */
 NAMED(_dotHEX, ".h");
 void dotHEX() {
+    // serUSB_print_hex_int(0xffff & pop(), HEX);
+    serUSB_print_hex_int(0xffff & pop());
+    serUSB_write(' '); serUSB_flush();
     /* Serial.print(0xffff & pop(), HEX); */
     /* Serial.print(" "); */
 }
@@ -272,7 +297,6 @@ void printZeds(int pvr) {
     if (pvr > 0xFFF) {
         return;
     }
-    serUSB_flush();
     serUSB_print("0"); // pad print job with leading zero
     serUSB_flush();
     if (pvr > 0xFF) {
@@ -285,7 +309,6 @@ void printZeds(int pvr) {
             return;
         }
     }
-    serUSB_flush();
     serUSB_print("0");
     serUSB_flush();
 }
@@ -298,9 +321,7 @@ void dumpRAM() {
     // ram = (char *)jaddr;
     ram = (char *)ORG_ptr;
     serUSB_print("!");
-    serUSB_flush();
     serUSB_print(" 0x");
-    serUSB_flush();
 
     int pvr = (int)ram;
 
@@ -314,10 +335,8 @@ void dumpRAM() {
      *                     *
      ***********************/
 
-    serUSB_flush();
     serUSB_write(':');
     serUSB_write(' ');
-    serUSB_flush();
     serUSB_print("   ");
 
     /* individual hex 2-digit groups l to r */
@@ -329,6 +348,7 @@ void dumpRAM() {
         }
         serUSB_print_hex(c);
         serUSB_write(' ');
+        serUSB_flush();
     }
     // ram = (char *)jaddr;
     ram = (char *)ORG_ptr;
@@ -339,13 +359,14 @@ void dumpRAM() {
             buffer[0] = '.';
         buffer[1] = '\0';
         serUSB_print(buffer);
+        serUSB_flush();
     }
     for (int iter = 8; iter > 0; iter--) {
         // jaddr++;
         ORG_ptr++;
     }
 
-    if (slower) {
+    if (slowerThan) {
         ard_delay(23);
     }
 
@@ -375,6 +396,7 @@ void rdumps() {
         dumpRAM();
     }
     serUSB_println("");
+    serUSB_flush();
 }
 
 /* End of Forth interpreter words */
@@ -424,16 +446,11 @@ void words() {
 
 /* Find a word in the dictionary, returning its position */
 int locate() {
-    serUSB_println("  -+- locate(): -+-"); serUSB_flush();
     for (int i = entries; i >= 0; i--) {
         strcpy(namebuf, dictionary[i].name);
         if (!strcmp(tib, namebuf)) {
             serUSB_print("  locate() returns: ");
-            serUSB_flush();
-
             serUSB_print_int(i);
-            serUSB_flush();
-
             serUSB_println("");
             serUSB_flush();
             return i;
@@ -453,11 +470,59 @@ int isNumber() {
     return 1;
 }
 
+int atoiLocal(char __xdata *str) {
+	int i;
+	int res = 0;
+
+    for (i = 0; str[i] != 0; ++i)
+        res = res * 10 + str[i] - '0';
+
+    return res;
+}
+
+// extern int atoi (const char *nptr);
+
 /* Convert number in tib */
 int number() {
-    char *endptr;
-    return (int) strtol(tib, &endptr, 0);
+    char* ram;
+    char* __xdata tibPtr = (char*) &tib;
+    ram = (char *)tibPtr;
+    int n = *ram;
+    // const char *endptr; SEE_LINE();
+    // char __xdata tibPtr = (char) &tib[0];
+
+    // char* tibPtrPtr = (char*) tibPtr;
+// int *ORG_ptr = &ORG; // okay for reading only
+    // char *endptr; SEE_LINE();
+    // endptr = &tib;
+    // int nmbr = atoi(&tibPtr);
+    // int nmbr =  (int) atoiLocal(&tibPtr);
+    // int* nmbrPtr = (int *) atoiLocal(&tibPtr);
+    // int* nmbrPtr = (int *) atoiLocal(*ram);
+    // int nmbr = *nmbrPtr;
+    // int nmbr = nmbrPtr;
+    int nmbr=n;
+    return nmbr;
+    // return (int) strtol(tib, &endptr, 0);
 }
+
+
+#if 0
+/* Is the word in tib a number? */
+int isNumber() {
+  char *endptr;
+  strtol(tib, &endptr, 0);
+  if (endptr == tib) return 0;
+  if (*endptr != '\0') return 0;
+  return 1;
+}
+
+/* Convert number in tib */
+int number() {
+  char *endptr;
+  return (int) strtol(tib, &endptr, 0);
+}
+#endif
 
 char ch;
 
@@ -522,7 +587,7 @@ uint8_t reading() {
             serUSB_flush();
             serUSB_print(" ahua!");
             serUSB_flush();
-            ahua_flg = -1;
+            ahua_flg = 1; // or use a signed int
         }
         return 1;
     }
@@ -590,7 +655,18 @@ void runword() {
         return;
     }
     if (isNumber()) {
-        push(number());
+        int nbr = number();
+
+        SEE_LINE();
+        serUSB_print(" show what number() has for us: ");
+        // serUSB_print_int(nbr);
+        serUSB_print_hex_int(nbr);
+        serUSB_print("  <-- nbr ");
+        serUSB_println("");
+        serUSB_flush();
+
+        // push(number());
+        push(nbr);
         ok();
         return;
     }
@@ -610,19 +686,19 @@ void thing_bb() {
 }
 
 void setupInterpreter() {
-    ard_delay(3000);
+    ard_delay(500);
+    // serUSB_println("");
+    // serUSB_println("");
+    // serUSB_println("");
+    // serUSB_flush();
     serUSB_println("");
-    serUSB_println("");
+    // serUSB_println("  aye bee cee dee eee eff gee ach eye jay kay ell emm enn "
+    //               "ohh pee que are ess tee you vee");
+    // serUSB_println("");
+    // serUSB_println("");
     serUSB_println("");
     serUSB_flush();
-    serUSB_println("");
-    serUSB_println("  aye bee cee dee eee eff gee ach eye jay kay ell emm enn "
-                   "ohh pee que are ess tee you vee");
-    serUSB_println("");
-    serUSB_println("");
-    serUSB_println("");
-    serUSB_flush();
-    ard_delay(1000);
+    ard_delay(500);
 
     char c = 'b';
     serUSB_write(c);
@@ -643,7 +719,7 @@ void setupInterpreter() {
 
     // uint8_t switchedOn = 0; /* -1  ACTIVE state */
 
-    uint8_t switchedOn = -1; /* -1  ACTIVE state */
+    uint8_t switchedOn = 0; /* -1  ACTIVE state */
 
     if (switchedOn) {
         SEE_LINE();

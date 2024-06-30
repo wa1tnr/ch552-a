@@ -20,6 +20,7 @@
  */
 
 #define LED_BUILTIN 16
+// #define __MULLONG_ASM_SMALL_AUTO__
 
 /* char __data buffer[64]; */
 
@@ -116,7 +117,7 @@ void serUSB_print_hex_int(int i) { USBSerial_print(i, HEX); }
 void serUSB_flush() { USBSerial_flush(); }
 
 void serUSB_print_hex(char c) {
-    if (c > 255)
+    if (c > 254) // 255 always false thanks compiler guy
         return;
     USBSerial_print(c, HEX);
 }
@@ -183,13 +184,11 @@ void slower() {
 // extern void Interpreter();
 
 void msg_longstars() {
-    serUSB_println("   * * * * * * * * * * * * * * * * * * * * * * * * * * * * "
-                   "* * * * * *");
+    serUSB_println("   * * * * * * * *");
 }
 
 void msg_starframed() {
-    serUSB_println("   * * *                                                   "
-                   "      * * *");
+    serUSB_println("   * * *       * * *");
 }
 
 void print_cool_things(int count) {
@@ -203,29 +202,6 @@ void print_cool_things(int count) {
     msg_starframed();
 
     serUSB_println("   * * *                     s t a t e                     "
-                   "      * * *");
-    msg_starframed();
-    serUSB_println("   * * *    pointer origin is gained by creation of __code "
-                   "var   * * *");
-    serUSB_println("   * * *    and pointing to it.                            "
-                   "      * * *");
-    msg_starframed();
-    serUSB_println("   * * *    location is random to this purpose (no easy "
-                   "way      * * *");
-    serUSB_println("   * * *    to suss that) so the rude dodge of "
-                   "decrementing      * * *");
-    serUSB_println("   * * *    a pointer to it is employed.                   "
-                   "      * * *");
-    msg_starframed();
-    serUSB_println("   * * *    Now *that* is an ugly hack, but has kicked the "
-                   "      * * *");
-    serUSB_println("   * * *    door down, so to speak - allowing .. cont "
-                   "later      * * *");
-    msg_starframed();
-    serUSB_println("   * * *    UPDATE: scratch that.  It was quite simple.    "
-                   "      * * *");
-    msg_starframed();
-    serUSB_println("   * * *    git repos updated: Fri 28th 17:24z or so.      "
                    "      * * *");
     msg_starframed();
     serUSB_println("   * * *         four eighty-seven Mars Std Time           "
@@ -268,7 +244,6 @@ extern void Interpreter();
 
 void setup() {
     delay(4000);
-    USBSerial_println(" void(setup() is running..");
     // USBSerial_println(" running setupInterpreter below:");
     delay(1000);
     setupInterpreter();

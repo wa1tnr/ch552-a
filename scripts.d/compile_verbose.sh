@@ -1,7 +1,10 @@
 #!/bin/sh
 # Fri 21 Jun 16:52:18 UTC 2024
 
-export LOCAL_ACLI_DIRECTOR_Y_PROJ_ECT="./sketch_jun25a"
+
+# // #define __MULLONG_ASM_SMALL_AUTO__
+
+export LOCAL_ACLI_DIRECTOR_Y_PROJ_ECT="./sketch_jun25a/sketch_jun25a"
 
 prequel_a() {
     echo
@@ -32,6 +35,8 @@ quiet_payload() {
          ${LOCAL_ACLI_DIRECTOR_Y_PROJ_ECT}
 }
 
+# // #define __MULLONG_ASM_SMALL_AUTO__
+
 payload_16() {
     arduino-cli -v compile \
          --fqbn CH55xDuino:mcs51:ch552 \
@@ -40,6 +45,9 @@ payload_16() {
          --board-options "upload_method=usb" \
          --board-options "usb_settings=usbcdc" \
          ${LOCAL_ACLI_DIRECTOR_Y_PROJ_ECT}
+
+# --build-property "compiler.cpp.extra_flags=\"-D__SDCC_MODEL_SMALL\"" \
+# --build-property "compiler.cpp.extra_flags=\"-D_MULLONG_ASM_SMALL_AUTO\"" \
 
 # arduino-cli compile --fqbn MiniCore:avr:328 --board-options "clock=8MHz_internal" --board-options "<menu ID>=<option ID>"
 

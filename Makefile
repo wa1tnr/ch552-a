@@ -8,7 +8,7 @@
 
 # https://stackoverflow.com/questions/13229071/pass-arguments-in-shell-script-from-a-makefile-and-get-back-the-results
 
-CURRENT=sketch_jun25a
+CURRENT=sketch_jun25a/sketch_jun25a
 # $(CURRENT)
 
 all:	clear_semaphores troubling
