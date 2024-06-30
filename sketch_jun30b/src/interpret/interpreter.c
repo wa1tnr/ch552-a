@@ -419,6 +419,25 @@ int isNumber() {
     return 1;
 }
 
+
+
+
+
+
+
+
+const uint8_t noMatch = 77;
+
+uint8_t xlate_hex_to_dec(char ptr) {
+    if (ptr == 'a') {
+        // USBSerial_write('Q');
+        uint8_t value = 10;
+        return value;
+    }
+    return noMatch; // what else might it return?
+}
+
+
 const char hexDigits[] = "0123456789abcdef";
 
 int atoiLocal(char __xdata *str) {
@@ -426,24 +445,38 @@ int atoiLocal(char __xdata *str) {
     int i;
     int res = 0;
     int resh = 0;
+    uint8_t value = 0;
 
-    // const char* p = *hexDigits;
     const char* p = (const char *) hexDigits;
 
-    USBSerial_println_s(p);
+    USBSerial_println(" table hexDigits array: ");
+    USBSerial_print("     ");
+    USBSerial_println_s(p); // prints entire 'table' (const char hexDigits array)
+    USBSerial_println(" <- table");
+    USBSerial_flush();
 
     for (uint8_t j = 0; hexDigits[j] != 0; j++) {
-        USBSerial_print(" n: ");
+        USBSerial_print("  n: ");
         USBSerial_print(j); // but why - it is an index into an arbitrary character set
-        USBSerial_write('>');
+        USBSerial_print(" >");
         USBSerial_flush();
         char ptr = hexDigits[j];
-        // char hDig = ptr;
-        // USBSerial_print(hDig);
+        uint8_t dec = xlate_hex_to_dec(ptr);
+
         USBSerial_print(ptr);
         USBSerial_write('<');
+
+
+        if (dec != noMatch) {
+            USBSerial_println("");
+            USBSerial_println("    ! noMatch  .. it is 'a' atm.. ");
+            USBSerial_print("     ");
+            USBSerial_flush();
+        }
+
+
+
         USBSerial_flush();
-        // USBSerial_print(j);
     }
 
     // hexDigits[j] holds a character
