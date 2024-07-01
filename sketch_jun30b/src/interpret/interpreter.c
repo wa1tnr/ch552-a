@@ -21,7 +21,7 @@ extern void ard_delay(int ms);
     USBSerial_print(__LINE__);                                                 \
     USBSerial_println("")
 
-uint8_t baseRadix = 10;
+uint8_t baseRadix = 16;
 uint8_t slowerThan = 0;
 
 __code int j = 0x7e;
@@ -433,7 +433,7 @@ int locate() {
 /* Is the word in tib a number? */
 int isNumber() {
     char *endptr;
-    strtol(tib, &endptr, 0);
+    strtol(tib, &endptr, baseRadix); // use zero for automatic or what have you
     if (endptr == tib)
         return 0;
     if (*endptr != '\0')
@@ -452,13 +452,20 @@ uint8_t xlate_hex_to_dec(char ptr) {
     return noMatch; // what else might it return?
 }
 
+/***
+ * 
+ * colonel Kurtz ;)
+ * 
+ */
+
 const char hexDigits[] = "0123456789abcdef";
 
 int atoiLocal(char __xdata *str) {
+    // *str[index] generates each character of $tib as requested
     SEE_LINE();
     int iter;
     int res = 0;
-    int resh = 0;
+    // int resh = 0;
     uint8_t value = 0;
 
     const char *p = (const char *)hexDigits;
@@ -489,33 +496,38 @@ int atoiLocal(char __xdata *str) {
         USBSerial_flush();
     }
 
-    // hexDigits[j] holds a character
-
-    // str[i] gives left to right  -  code lifted outside source
-
-    // str must be <thing> then
-
-    //  1BC = 444
-
-    //  256 + 176 + 12
-
-    //     1     B     C
-    //  0001  1011  1100
-    //  0001  0000  0000    256
-    //  0000  1011  0000    176
-    //  0000  0000  1100     12
-
-    // no of course
-
     for (iter = 0; str[iter] != 0; ++iter) {
-        resh = resh * 16 + str[iter] - '0';
-        res = res * 10 + str[iter] - '0';
-    }
 
-    USBSerial_println("  the  for   loop mistake exits here.");
-    USBSerial_flush();
+        int interim;
+
+        interim = str[iter] - '0' - ((baseRadix == 16) * 7);
+
+        USBSerial_println("");
+        if (interim < 10) {
+            USBSerial_print("yeah it is less than ten");
+            USBSerial_flush();
+            res  = res  * baseRadix + str[iter] - '0';
+        }
+
+        if (interim > 9) {
+            USBSerial_print("well it is greater than nine");
+            USBSerial_flush();
+            res = res * baseRadix + str[iter] - '0' - ((baseRadix == 16) * 7) ;
+        }
+    }
     return res;
 }
+
+#if 0
+    if (baseRadix == 10) {
+        return res;
+    }
+    if (baseRadix == 16) {
+        return resh;
+    }
+    return 0;
+#endif
+
 
 /* Convert number in tib */
 int number() {
@@ -731,3 +743,5 @@ void Interpreter() {
 /* end. */
 
 // uint8_t baseRadix = 10;
+
+// good.
