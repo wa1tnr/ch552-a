@@ -442,7 +442,7 @@ const char hexDigits[] = "0123456789abcdef";
 
 int atoiLocal(char __xdata *str) {
     SEE_LINE();
-    int i;
+    int iter;
     int res = 0;
     int resh = 0;
     uint8_t value = 0;
@@ -466,16 +466,12 @@ int atoiLocal(char __xdata *str) {
         USBSerial_print(ptr);
         USBSerial_write('<');
 
-
         if (dec != noMatch) {
             USBSerial_println("");
             USBSerial_println("    ! noMatch  .. it is 'a' atm.. ");
             USBSerial_print("     ");
             USBSerial_flush();
         }
-
-
-
         USBSerial_flush();
     }
 
@@ -495,10 +491,15 @@ int atoiLocal(char __xdata *str) {
         //  0000  1011  0000    176
         //  0000  0000  1100     12
 
-    for (i = 0; str[i] != 0; ++i)
-        resh = resh * 16 + str[i] - '0'; // no of course  
+        // no of course
 
-        res = res * 10 + str[i] - '0';
+    for (iter = 0; str[iter] != 0; ++iter) {
+        resh = resh * 16 + str[iter] - '0';
+        res = res * 10 + str[iter] - '0';
+    }
+
+    USBSerial_println("  the  for   loop mistake exits here.");
+    USBSerial_flush();
     return res;
 }
 
