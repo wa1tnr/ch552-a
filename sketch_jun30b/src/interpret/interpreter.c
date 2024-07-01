@@ -30,6 +30,8 @@ __code int j = 0x7e;
 __code __at(0x0) char ORG;
 
 int *ORG_ptr = &ORG; // okay for reading only
+int *ORG_ptrBu = &ORG;
+int *ORG_ptrBuBu = &ORG;
 int *jaddr = &j;
 
 /* Tiny interpreter,
@@ -282,12 +284,14 @@ void throw(int error) {
 void dumpRAM() {
     char buffer[5] = "";
     char *ram;
+
     ram = (char *)ORG_ptr;
+
     USBSerial_print("!");
     USBSerial_print(" 0x");
     int pvr = (int)ram;
 
-    if (pvr > 0x400) {
+    if (pvr > 0x3400) {
         int error = -13;
         throw(error);
     }
@@ -359,9 +363,35 @@ void dumping() {
     USBSerial_flush();
 }
 
+void resetOrgPtr() {
+    ORG_ptrBu = ORG_ptrBuBu ;
+}
+
 /* dump 256 bytes of RAM */
 NAMED(_dumpr, "dump");
 void rdumps() {
+    int ORGOffset = 0;
+
+    ORGOffset = pop(); drop(); back(); push(0);
+
+    USBSerial_println("");
+    dotShex();
+    USBSerial_println("");
+    USBSerial_flush();
+
+    uint8_t isOffset = (ORGOffset > 0);
+
+    if (isOffset) {
+        resetOrgPtr();
+        ORG_ptr = ORG_ptrBu;
+        ORG_ptr = ORG_ptr + (ORGOffset / 2);
+        ORG_ptrBu = ORG_ptrBu + 128 ;
+    }
+
+    ORG_ptr++; ORG_ptr--; // align
+    dumping();
+
+#if 0
     int iterations = 1;
     int popped = pop();
     if (popped > 0) {
@@ -371,6 +401,7 @@ void rdumps() {
     for (int count = iterations; count > 0; count--) {
         dumping();
     }
+#endif
 }
 
 /* End of Forth interpreter words */
@@ -514,7 +545,6 @@ uint8_t ahua_flg = 0;
 uint8_t two_ahua_flg = 0;
 
 /* Incrementally read command line from serial port */
-/* byte reading() { */
 uint8_t reading() {
     if (!USBSerial_available())
         return 1;
