@@ -1,10 +1,10 @@
 #!/bin/sh
 # Fri 21 Jun 16:52:18 UTC 2024
 
-
 # // #define __MULLONG_ASM_SMALL_AUTO__
 
-export LOCAL_ACLI_DIRECTOR_Y_PROJ_ECT="./sketch_jun30b"
+export LOCAL_ACLI_DIRECTOR_Y_PROJ_ECT="./forthLikeItpr-b"
+ forthLikeItpr-b
 
 prequel_a() {
     echo
