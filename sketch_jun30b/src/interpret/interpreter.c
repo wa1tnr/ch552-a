@@ -248,19 +248,16 @@ void printZeds(int pvr) {
         return;
     }
     USBSerial_print("0"); // pad print job with leading zero
-    USBSerial_flush();
     if (pvr > 0xFF) {
         return;
     }
     if (pvr < 0x100) {
         USBSerial_print("0");
-        USBSerial_flush();
         if (pvr > 0x0F) {
             return;
         }
     }
     USBSerial_print("0");
-    USBSerial_flush();
 }
 
 void spaces(int qty) {
@@ -318,7 +315,6 @@ void dumpRAM() {
         }
         USBSerial_print(c, HEX);
         USBSerial_write(' ');
-        USBSerial_flush();
     }
     ram = (char *)ORG_ptr;
     USBSerial_print("   ");
@@ -328,7 +324,6 @@ void dumpRAM() {
             buffer[0] = '.';
         buffer[1] = '\0';
         USBSerial_print(buffer);
-        USBSerial_flush();
     }
     for (int iter = 8; iter > 0; iter--) {
         ORG_ptr++;
@@ -388,10 +383,10 @@ void rdumps() {
 
 /* empty words don't cause an error */
 
-NAMED(_nopp, " ");
+NAMED(_nopp, "nopp");
 void nopp() {}
 
-NAMED(_nop, " ");
+NAMED(_nop, "nop");
 void nop() {}
 
 /* Forward declaration required here */
@@ -470,16 +465,16 @@ const char hexDigits[] = "0123456789abcdef";
 int atoiLocal(char __xdata *str) {
     int iter;
     int res = 0;
-    // int resh = 0;
     uint8_t value = 0;
 
+#if 0
     for (uint8_t j = 0; hexDigits[j] != 0; j++) {
         char ptr = hexDigits[j];
         uint8_t dec = xlate_hex_to_dec(ptr);
         if (dec != noMatch) {
         }
-        USBSerial_flush();
     }
+#endif
 
     for (iter = 0; str[iter] != 0; ++iter) {
         int interim;
@@ -503,16 +498,13 @@ int number() {
     ram = (char *)tibPtr;
     int n = *ram;
     int nmbr = atoiLocal((char __xdata *)tib);
-    // USBSerial_println("DARMOK and Gilad at Tenagra!");
-    // USBSerial_flush();
     return nmbr;
 }
 
 char ch;
 
 void ok() {
-    if (ch == '\r')
-        return;
+    if (ch == '\r') USBSerial_print(" ok ");
 }
 
 #define BACKSPACE '\010'
@@ -614,14 +606,17 @@ void runword() {
         ok();
         return;
     }
+    const uint8_t switchedOn = 0;
     if (isNumber()) {
         int nbr = number();
 
-        USBSerial_print(" hex: ");
-        USBSerial_print(nbr, HEX);
-        USBSerial_print("  <-- number, HEX");
-        USBSerial_println("");
-        USBSerial_flush();
+        if (switchedOn) {
+            USBSerial_print(" hex: ");
+            USBSerial_print(nbr, HEX);
+            USBSerial_print("  <-- number, HEX");
+            USBSerial_println("");
+            USBSerial_flush();
+        }
 
         push(nbr);
         ok();
@@ -630,37 +625,10 @@ void runword() {
     /* USBSerial_println("?"); */
 }
 
-void thing_bb() {
-
-    int iterations = 2; // 32
-
-    for (int i = iterations; i > 0; i--) {
-        USBSerial_flush();
-        rdumps();
-        USBSerial_flush();
-        ard_delay(60);
-    }
-}
-
 void setupInterpreter() {
-    SEE_LINE();
-    USBSerial_println("I am inside setupInterpreter()");
-    // conclusion: no need for USBSerial_foo() wrappers
-    // however, must have this in a C (not C++ here)
-    // source file (such as the present interpeter.c
-    // file):
-    // #include <Arduino.h>
-    USBSerial_flush();
-    ard_delay(500);
-    USBSerial_println("");
-    USBSerial_flush();
-    ard_delay(500);
-
+    ard_delay(800);
     char c = ' ';
-    USBSerial_write(c);
-    c = ' ';
-    USBSerial_write(c);
-    USBSerial_println(" jasper wy Forth-like interpreter:");
+    USBSerial_println(" kansas nb Forth-like interpreter:");
     words();
     USBSerial_println("");
     USBSerial_flush();
@@ -668,22 +636,9 @@ void setupInterpreter() {
     for (int offset = (0x11C0 + 0xB); offset > 0; offset--) {
         jaddr--; // re-align
     }
-
-    uint8_t switchedOn = 0; /* -1  ACTIVE state */
-
-    if (switchedOn) {
-        SEE_LINE();
-        USBSerial_println("   switchedOn active");
-        USBSerial_flush();
-
-        for (int i = 2; i > 0; i--) {
-            thing_bb();
-        }
-    }
 }
 
 void Interpreter() {
-    USBSerial_flush();
     readword();
     runword();
 }
@@ -699,14 +654,6 @@ void Interpreter() {
  *
  */
 
-/***
- *
- *
- *
- */
+// quite good.
 
 /* end. */
-
-// uint8_t baseRadix = 10;
-
-// quite good.

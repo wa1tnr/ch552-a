@@ -1,3 +1,4 @@
+
 # Wed 26 Jun 02:34:05 UTC 2024
 # Wed 26 Jun 01:09:50 UTC 2024
 # Sun 23 Jun 12:58:54 UTC 2024
@@ -22,6 +23,7 @@ clear_semaphores:
 	@rm -rf ./.semaphore*
 	@> .semaphore-clear_semaphores
 	@echo clear_semaphores_done
+	@./scripts.d/banner.sh
 	@./scripts.d/stall.sh
 
 verbose:	clean compile_verbose

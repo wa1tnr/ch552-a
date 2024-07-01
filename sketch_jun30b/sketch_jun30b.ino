@@ -1,4 +1,5 @@
-/* Blink /*
+/* Mon  1 Jul 18:11:33 UTC 2024 */
+/* Shattuck's Forth-like interpreter */
 
 /*
  *  refs
@@ -6,29 +7,12 @@
  *    https://easyeda.com/wagiminator
  *    using:  http://creativecommons.org/licenses/by-sa/3.0/
  *    for:
- *
-https://github.com/wagiminator/CH552-USB-OLED/blob/main/software/cdc_oled_terminal/src/oled_term.c#L161-L197
+ * https://github.com/wagiminator/CH552-USB-OLED/blob/main/software/cdc_oled_terminal/src/oled_term.c#L161-L197
  *    Thank you.
  */
 
+/* TODO: remove ard_delay not needed */
 void ard_delay(int ms) { delay(ms); }
-
-#if 0
-void serUSB_print_hex(char c) {
-    if (c > 254) // 255 always false thanks compiler guy
-        return;
-    USBSerial_print(c, HEX);
-}
-
-void serUSB_write(char c) {
-    c = c & 0x7F; // ignore top bit
-    if (c > 254)
-        return;
-    if ((c > 31) || (c == '\r') || (c == '\n') || (c == '\010')) {
-        USBSerial_write(c);
-    }
-}
-#endif
 
 void slowerE() {
     for (int p = 250; p > 0; p--) {
