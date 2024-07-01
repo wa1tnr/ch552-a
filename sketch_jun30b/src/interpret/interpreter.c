@@ -168,6 +168,12 @@ void dot() {
     USBSerial_flush();
 }
 
+// void baser(uint8_t radix) { baseRadix = radix; }
+NAMED(_base, "base");
+void base() {
+    baseRadix = (uint8_t) pop();
+}
+
 /* destructively display top of stack, hex */
 NAMED(_dotHEX, ".h");
 void dotHEX() {
@@ -401,6 +407,7 @@ const entry dictionary[] = {
     {_over, over},     {_add, add},       {_and, and_},
     {_or, or_},        {_xor, xor_},      {_invert, invert},
     {_negate, negate}, {_dotS, dotS},     {_dotShex, dotShex},
+    {_base, base},
     {_dot, dot},       {_dotHEX, dotHEX}, {_delay, del},
     {_high, high},     {_low, low},       {_in, in},
     {_input, input},   {_output, output}, {_input_pullup, input_pullup},
@@ -461,73 +468,33 @@ uint8_t xlate_hex_to_dec(char ptr) {
 const char hexDigits[] = "0123456789abcdef";
 
 int atoiLocal(char __xdata *str) {
-    // *str[index] generates each character of $tib as requested
-    SEE_LINE();
     int iter;
     int res = 0;
     // int resh = 0;
     uint8_t value = 0;
 
-    const char *p = (const char *)hexDigits;
-
-    USBSerial_println(" table hexDigits array: ");
-    USBSerial_print("     ");
-    USBSerial_println_s(p); // hexDigits array
-    USBSerial_println(" <- table");
-    USBSerial_flush();
-
     for (uint8_t j = 0; hexDigits[j] != 0; j++) {
-        USBSerial_print("  n: ");
-        USBSerial_print(j);
-        USBSerial_print(" >");
-        USBSerial_flush();
         char ptr = hexDigits[j];
         uint8_t dec = xlate_hex_to_dec(ptr);
-
-        USBSerial_print(ptr);
-        USBSerial_write('<');
-
         if (dec != noMatch) {
-            USBSerial_println("");
-            USBSerial_println("    ! noMatch  .. it is 'a' atm.. ");
-            USBSerial_print("     ");
-            USBSerial_flush();
         }
         USBSerial_flush();
     }
 
     for (iter = 0; str[iter] != 0; ++iter) {
-
         int interim;
-
         interim = str[iter] - '0' - ((baseRadix == 16) * 7);
 
-        USBSerial_println("");
         if (interim < 10) {
-            USBSerial_print("yeah it is less than ten");
-            USBSerial_flush();
             res  = res  * baseRadix + str[iter] - '0';
         }
 
         if (interim > 9) {
-            USBSerial_print("well it is greater than nine");
-            USBSerial_flush();
             res = res * baseRadix + str[iter] - '0' - ((baseRadix == 16) * 7) ;
         }
     }
     return res;
 }
-
-#if 0
-    if (baseRadix == 10) {
-        return res;
-    }
-    if (baseRadix == 16) {
-        return resh;
-    }
-    return 0;
-#endif
-
 
 /* Convert number in tib */
 int number() {
@@ -675,8 +642,6 @@ void thing_bb() {
     }
 }
 
-void base(uint8_t radix) { baseRadix = radix; }
-
 void setupInterpreter() {
     SEE_LINE();
     USBSerial_println("I am inside setupInterpreter()");
@@ -744,4 +709,4 @@ void Interpreter() {
 
 // uint8_t baseRadix = 10;
 
-// good.
+// quite good.
