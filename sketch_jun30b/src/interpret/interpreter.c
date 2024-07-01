@@ -14,26 +14,12 @@
 #define LED_BUILTIN 33
 const int ledPin = LED_BUILTIN; // the number of the LED pin
 
-#if 0
-extern uint8_t USBSerial_available();
-extern char USBSerial_read();
-extern void USBSerial_print_int(int i);
-extern void USBSerial_print_hex_int(int i);
-extern void USBSerial_write(char c);
-extern void USBSerial_print_hex(char c);
-extern void USBSerial_print(char *str);
-extern void USBSerial_println(char *str);
-extern void USBSerial_flush();
-#endif
 extern void ard_delay(int ms);
 
-#define LIMIT_OUTER_ONE_EACH_ 0x1E00
-
 #define SEE_LINE()                                                             \
-    USBSerial_print("   see: interpreter.c  LINE ");                              \
-    USBSerial_print(__LINE__);                                                \
+    USBSerial_print("   see: interpreter.c  LINE ");                           \
+    USBSerial_print(__LINE__);                                                 \
     USBSerial_println("")
-
 
 uint8_t baseRadix = 10;
 uint8_t slowerThan = 0;
@@ -271,6 +257,24 @@ void printZeds(int pvr) {
     USBSerial_flush();
 }
 
+void spaces(int qty) {
+    for (int quantity = qty; quantity > 0; quantity--) {
+        USBSerial_write(' ');
+    }
+}
+
+void throw(int error) {
+    SEE_LINE();
+    USBSerial_print("   * * *     ERROR ");
+    USBSerial_print(error);
+    USBSerial_print("     * * *");
+    spaces(7);
+    USBSerial_print(" PRESS  ~ RESET ~");
+    USBSerial_flush();
+    while (-1)
+        ;
+}
+
 /* dump 16 bytes of RAM in hex with ascii on the side */
 void dumpRAM() {
     char buffer[5] = "";
@@ -279,6 +283,12 @@ void dumpRAM() {
     USBSerial_print("!");
     USBSerial_print(" 0x");
     int pvr = (int)ram;
+
+    if (pvr > 0x400) {
+        int error = -13;
+        throw(error);
+    }
+
     printZeds(pvr);
     USBSerial_print(pvr, HEX);
 
@@ -338,7 +348,6 @@ void dumpRAM() {
         }
     }
 }
-
 
 void dumping() {
     for (uint8_t i = 0; i < 16; i++) {
@@ -432,13 +441,6 @@ int isNumber() {
     return 1;
 }
 
-
-
-
-
-
-
-
 const uint8_t noMatch = 77;
 
 uint8_t xlate_hex_to_dec(char ptr) {
@@ -450,7 +452,6 @@ uint8_t xlate_hex_to_dec(char ptr) {
     return noMatch; // what else might it return?
 }
 
-
 const char hexDigits[] = "0123456789abcdef";
 
 int atoiLocal(char __xdata *str) {
@@ -460,17 +461,17 @@ int atoiLocal(char __xdata *str) {
     int resh = 0;
     uint8_t value = 0;
 
-    const char* p = (const char *) hexDigits;
+    const char *p = (const char *)hexDigits;
 
     USBSerial_println(" table hexDigits array: ");
     USBSerial_print("     ");
-    USBSerial_println_s(p); // prints entire 'table' (const char hexDigits array)
+    USBSerial_println_s(p); // hexDigits array
     USBSerial_println(" <- table");
     USBSerial_flush();
 
     for (uint8_t j = 0; hexDigits[j] != 0; j++) {
         USBSerial_print("  n: ");
-        USBSerial_print(j); // but why - it is an index into an arbitrary character set
+        USBSerial_print(j);
         USBSerial_print(" >");
         USBSerial_flush();
         char ptr = hexDigits[j];
@@ -490,21 +491,21 @@ int atoiLocal(char __xdata *str) {
 
     // hexDigits[j] holds a character
 
-        // str[i] gives left to right  -  code lifted outside source
+    // str[i] gives left to right  -  code lifted outside source
 
-        // str must be <thing> then
+    // str must be <thing> then
 
-        //  1BC = 444
+    //  1BC = 444
 
-        //  256 + 176 + 12
+    //  256 + 176 + 12
 
-        //     1     B     C
-        //  0001  1011  1100
-        //  0001  0000  0000    256
-        //  0000  1011  0000    176
-        //  0000  0000  1100     12
+    //     1     B     C
+    //  0001  1011  1100
+    //  0001  0000  0000    256
+    //  0000  1011  0000    176
+    //  0000  0000  1100     12
 
-        // no of course
+    // no of course
 
     for (iter = 0; str[iter] != 0; ++iter) {
         resh = resh * 16 + str[iter] - '0';
@@ -662,10 +663,7 @@ void thing_bb() {
     }
 }
 
-
-void base(uint8_t radix) {
-    baseRadix = radix;
-}
+void base(uint8_t radix) { baseRadix = radix; }
 
 void setupInterpreter() {
     SEE_LINE();
