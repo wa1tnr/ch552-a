@@ -339,15 +339,28 @@ void dumpRAM() {
     }
 }
 
-/* dump 256 bytes of RAM */
-NAMED(_dumpr, "dump");
-void rdumps() {
+
+void dumping() {
     for (uint8_t i = 0; i < 16; i++) {
         USBSerial_println("");
         dumpRAM();
     }
     USBSerial_println("");
     USBSerial_flush();
+}
+
+/* dump 256 bytes of RAM */
+NAMED(_dumpr, "dump");
+void rdumps() {
+    int iterations = 1;
+    int popped = pop();
+    if (popped > 0) {
+        iterations = popped; // override unless zero
+    }
+    // everybody:
+    for (int count = iterations; count > 0; count--) {
+        dumping();
+    }
 }
 
 /* End of Forth interpreter words */
