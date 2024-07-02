@@ -1,15 +1,9 @@
 /* interpreter.c - Shattuck's Forth-like interpreter - port to CH552 8051 MCU */
 /* June, 2024 */
 #include <Arduino.h>
-#include <sdcc-lib.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
 
-/***
- *
- *
- */
+const char signature[] = "   This is what a const char array is like and where "
+                         "it is stored fedcba9876543210 back quiet   ";
 
 #define LED_BUILTIN 33
 const int ledPin = LED_BUILTIN; // the number of the LED pin
@@ -126,11 +120,19 @@ void over() {
     push(a);
     push(b);
 }
+
 /* add top two items */
 NAMED(_add, "+");
 void add() {
     int a = pop();
     TOS = a + TOS;
+}
+
+/* multiply top two items */
+NAMED(_multply, "*");
+void multply() {
+    int a = pop();
+    TOS = a * TOS;
 }
 
 /* bitwise and top two items */
@@ -172,9 +174,7 @@ void dot() {
 
 // void baser(uint8_t radix) { baseRadix = radix; }
 NAMED(_base, "base");
-void base() {
-    baseRadix = (uint8_t) pop();
-}
+void base() { baseRadix = (uint8_t)pop(); }
 
 /* destructively display top of stack, hex */
 NAMED(_dotHEX, ".h");
@@ -200,18 +200,18 @@ void dotS() {
 
 /* delay TOS # of milliseconds */
 NAMED(_delay, "delay");
-void del() { ard_delay(pop()); }
+void del() {delay(pop()); }
 
 /* Toggle pin at TOS and delay(spd), repeat... */
 NAMED(_wiggle, "wiggle");
 void wiggle() {
     uint8_t a = pop();
-    /* pinMode(a, OUTPUT); */
+    pinMode(a, OUTPUT);
     for (uint8_t i = 0; i < 20; i++) {
-        /* digitalWrite(a, HIGH); */
-        /* delay(100); */
-        /* digitalWrite(a, LOW); */
-        /* delay(100); */
+        digitalWrite(a, HIGH);
+        delay(100);
+        digitalWrite(a, LOW);
+        delay(100);
     }
 }
 
@@ -291,7 +291,7 @@ void dumpRAM() {
     USBSerial_print(" 0x");
     int pvr = (int)ram;
 
-    if (pvr > 0x3400) {
+    if (pvr > 0x3FF0) {
         int error = -13;
         throw(error);
     }
@@ -363,19 +363,20 @@ void dumping() {
     USBSerial_flush();
 }
 
-void resetOrgPtr() {
-    ORG_ptrBu = ORG_ptrBuBu ;
-}
+void resetOrgPtr() { ORG_ptrBu = ORG_ptrBuBu; }
 
 /* dump 256 bytes of RAM */
 NAMED(_dumpr, "dump");
 void rdumps() {
-    int ORGOffset = 0;
-
-    ORGOffset = pop(); drop(); back(); push(0);
+    int ORGOffset = pop();
+    drop();
+    back();
+    push(0);
 
     USBSerial_println("");
+
     dotShex();
+
     USBSerial_println("");
     USBSerial_flush();
 
@@ -385,10 +386,34 @@ void rdumps() {
         resetOrgPtr();
         ORG_ptr = ORG_ptrBu;
         ORG_ptr = ORG_ptr + (ORGOffset / 2);
-        ORG_ptrBu = ORG_ptrBu + 128 ;
+        ORG_ptrBu = ORG_ptrBu + 128;
     }
 
-    ORG_ptr++; ORG_ptr--; // align
+    ORG_ptr++;
+    ORG_ptr--; // align
+
+    /*
+     *
+     *            pointer alignment in flashROM memory
+     *
+     * The alignment consequences are:
+     *
+     *     '1  dump'  dumps from  0x0000   .. but
+     *     '2  dump'  dumps from  0x0002   .. and that
+     *
+     *     '1  dump'  does not
+     *                dump  from  0x0001   .. as expected.
+     *
+     * The pointer dodge intends to keep memory aligned, based
+     * on experimental evidence.  It was decided to use ptr++
+     * syntax to do that.
+     *
+     * Entirely unrearched here as to appropriateness.
+     *
+     * This comment was made with no testing as to just where
+     * it applies (best) in the program.
+     *
+     */
     dumping();
 
 #if 0
@@ -430,7 +455,8 @@ const entry dictionary[] = {
     {_nopp, nopp},
     {_nop, nop},       {_words, words},   {_dup, dup},
     {_drop, drop},     {_back, back},     {_swap, swap},
-    {_over, over},     {_add, add},       {_and, and_},
+    {_over, over},     {_add, add},       {_multply, multply},
+    {_and, and_},
     {_or, or_},        {_xor, xor_},      {_invert, invert},
     {_negate, negate}, {_dotS, dotS},     {_dotShex, dotShex},
     {_base, base},
@@ -486,9 +512,9 @@ uint8_t xlate_hex_to_dec(char ptr) {
 }
 
 /***
- * 
+ *
  * colonel Kurtz ;)
- * 
+ *
  */
 
 const char hexDigits[] = "0123456789abcdef";
@@ -512,11 +538,11 @@ int atoiLocal(char __xdata *str) {
         interim = str[iter] - '0' - ((baseRadix == 16) * 7);
 
         if (interim < 10) {
-            res  = res  * baseRadix + str[iter] - '0';
+            res = res * baseRadix + str[iter] - '0';
         }
 
         if (interim > 9) {
-            res = res * baseRadix + str[iter] - '0' - ((baseRadix == 16) * 7) ;
+            res = res * baseRadix + str[iter] - '0' - ((baseRadix == 16) * 7);
         }
     }
     return res;
@@ -535,7 +561,8 @@ int number() {
 char ch;
 
 void ok() {
-    if (ch == '\r') USBSerial_print(" ok ");
+    if (ch == '\r')
+        USBSerial_print(" ok ");
 }
 
 #define BACKSPACE '\010'
@@ -656,9 +683,17 @@ void runword() {
 }
 
 void setupInterpreter() {
-    ard_delay(800);
-    char c = ' ';
+    delay(800);
+    delay(800);
+    delay(800);
+    delay(800);
+    USBSerial_println("");
+    USBSerial_flush();
+    USBSerial_println(signature);
+    USBSerial_println("");
+    USBSerial_flush();
     USBSerial_println(" kansas nb Forth-like interpreter:");
+    USBSerial_flush();
     words();
     USBSerial_println("");
     USBSerial_flush();
@@ -669,6 +704,7 @@ void setupInterpreter() {
 }
 
 void Interpreter() {
+    USBSerial_flush();
     readword();
     runword();
 }
