@@ -28,11 +28,18 @@ int *ORG_ptrBu      = &ORG;
 int *ORG_ptrBuBu    = &ORG;
 int *jaddr = &j;
 
-__xdata int k = 0x7b;
-__xdata __at(0x0) char ORGXdata;
+// xdata is abt 1 kb
+// data is abt 128 bytes perhaps - check datasheet and reexamine dump
+__data __at(0x0) char k;
+__data __at(0x0) char ORGXdata;
 int *ORG_XPtr       = &ORGXdata; // unknown okay
 int *ORG_XPtrBu     = &ORGXdata;
 int *ORG_XPtrBuBu   = &ORGXdata;
+
+int *ORG_kaddrPtr      = &k;
+int *ORG_kaddrPtrBu    = &k;
+int *ORG_kaddrPtrBuBu  = &k;
+
 int *kaddr = &k;
 
 /* Tiny interpreter,
@@ -299,16 +306,17 @@ void dumpRAM() {
     char buffer[5] = "";
     char *ram;
 
-    const uint8_t xdataP = 1;
+    const uint8_t xdataP = 0; // 0 code; 1 for data iram or xdata xram
 
-    ram = 0;
+    // ram = 0;
 
     if (!xdataP) {
         ram = (char *)ORG_ptr;
     }
 
     if (xdataP) {
-        ram = (char *)ORG_XPtr;
+        // ram = (char *)ORG_XPtr;
+        ram = (char *)ORG_kaddrPtr;
     }
 
     USBSerial_print("!");
@@ -350,7 +358,8 @@ void dumpRAM() {
     }
 
     if (xdataP) {
-        ram = (char *)ORG_XPtr;
+        // ram = (char *)ORG_XPtr;
+        ram = (char *)ORG_kaddrPtr;
     }
 
     USBSerial_print("   ");
@@ -365,6 +374,7 @@ void dumpRAM() {
     for (int iter = 8; iter > 0; iter--) {
         ORG_XPtr++;
         ORG_ptr++;
+        ORG_kaddrPtr++;
     }
 
     if (slowerThan) {
@@ -398,8 +408,9 @@ void dumping() {
 }
 
 void resetOrgPtr() {
-    ORG_ptrBu = ORG_ptrBuBu;
-    ORG_XPtrBu = ORG_XPtrBuBu;
+    ORG_ptrBu      = ORG_ptrBuBu;
+    ORG_XPtrBu     = ORG_XPtrBuBu;
+    ORG_kaddrPtrBu = ORG_kaddrPtrBuBu;
 }
 
 /* dump 256 bytes of RAM */
@@ -419,8 +430,6 @@ void rdumps() {
 
     uint8_t isOffset = (ORGOffset > 0);
 
-// int *ORG_XPtr       = &ORGXdata; // unknown okay
-
     if (isOffset) {
         resetOrgPtr();
         ORG_ptr   = ORG_ptrBu;
@@ -430,6 +439,10 @@ void rdumps() {
         ORG_XPtr  = ORG_XPtrBu;
         ORG_XPtr  = ORG_XPtr + (ORGOffset / 2); // assume same case as above
         ORG_XPtrBu = ORG_XPtrBu + 128;
+
+        ORG_kaddrPtr = ORG_kaddrPtrBu;
+        ORG_kaddrPtr = ORG_kaddrPtr + (ORGOffset / 2);
+        ORG_kaddrPtrBu = ORG_kaddrPtrBu + 128;
     }
 
     ORG_ptr++;
@@ -437,6 +450,10 @@ void rdumps() {
 
     ORG_XPtr++;
     ORG_XPtr--;
+
+    ORG_kaddrPtr++;
+    ORG_kaddrPtr--;
+
 
     /*
      *            pointer alignment in flashROM memory
