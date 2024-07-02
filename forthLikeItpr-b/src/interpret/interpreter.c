@@ -21,12 +21,19 @@ uint8_t slowerThan = 0;
 __code int j = 0x7e;
 
 // cannot do anything here - likely is boot area:
-__code __at(0x0) char ORG;
+__code __at(0x0) char  ORG;
 
-int *ORG_ptr = &ORG; // okay for reading only
-int *ORG_ptrBu = &ORG;
-int *ORG_ptrBuBu = &ORG;
+int *ORG_ptr        = &ORG; // okay for reading only
+int *ORG_ptrBu      = &ORG;
+int *ORG_ptrBuBu    = &ORG;
 int *jaddr = &j;
+
+__xdata int k = 0x7b;
+__xdata __at(0x0) char ORGXdata;
+int *ORG_XPtr       = &ORGXdata; // unknown okay
+int *ORG_XPtrBu     = &ORGXdata;
+int *ORG_XPtrBuBu   = &ORGXdata;
+int *kaddr = &k;
 
 /* Tiny interpreter,
    similar to myforth's Standalone Interpreter
