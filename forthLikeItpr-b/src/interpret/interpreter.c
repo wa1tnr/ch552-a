@@ -3,12 +3,10 @@
 #include <Arduino.h>
 
 const char signature[] = "   This is what a const char array is like and where "
-                         "it is stored fedcba9876543210 back quiet   ";
+                         "it is stored  ";
 
 #define LED_BUILTIN 33
 const int ledPin = LED_BUILTIN; // the number of the LED pin
-
-extern void ard_delay(int ms);
 
 #define SEE_LINE()                                                             \
     USBSerial_print("   see: interpreter.c  LINE ");                           \
@@ -26,7 +24,6 @@ __code __at(0x0) char  ORG;
 int *ORG_ptr        = &ORG; // okay for reading only
 int *ORG_ptrBu      = &ORG;
 int *ORG_ptrBuBu    = &ORG;
-int *jaddr = &j;
 
 // xdata is abt 1 kb
 // data is abt 128 bytes perhaps - check datasheet and reexamine dump
@@ -378,26 +375,9 @@ void dumpRAM() {
     }
 
     if (slowerThan) {
-        ard_delay(23);
-    }
-
-    int tested = (int)ram;
-
-    if (tested > 0x4000) {
-        USBSerial_println("");
-        USBSerial_print("    __code address 0x");
-        USBSerial_print(tested, HEX);
-        USBSerial_println(" may be a DANGER  ");
-        SEE_LINE();
-        USBSerial_flush();
-        while (-1) {
-            ard_delay(2000);
-            USBSerial_write('.');
-            USBSerial_flush();
-        }
+        delay(23);
     }
 }
-
 void dumping() {
     for (uint8_t i = 0; i < 16; i++) {
         USBSerial_println("");
@@ -555,21 +535,10 @@ uint8_t xlate_hex_to_dec(char ptr) {
  *
  */
 
-const char hexDigits[] = "0123456789abcdef";
-
 int atoiLocal(char __xdata *str) {
     int iter;
     int res = 0;
     uint8_t value = 0;
-
-#if 0
-    for (uint8_t j = 0; hexDigits[j] != 0; j++) {
-        char ptr = hexDigits[j];
-        uint8_t dec = xlate_hex_to_dec(ptr);
-        if (dec != noMatch) {
-        }
-    }
-#endif
 
     for (iter = 0; str[iter] != 0; ++iter) {
         int interim;
@@ -604,7 +573,6 @@ void ok() {
 }
 
 #define BACKSPACE '\010'
-#define RUBOUT '\177'
 
 uint8_t ahua_flg = 0;
 uint8_t two_ahua_flg = 0;
@@ -636,25 +604,19 @@ uint8_t reading() {
 
     if (ch == BACKSPACE) {
         USBSerial_write(' ');
-        USBSerial_flush();
         USBSerial_write(BACKSPACE);
         USBSerial_flush();
         if (pos > 0) {
             USBSerial_write(BACKSPACE);
-            USBSerial_flush();
             USBSerial_write(' ');
-            USBSerial_flush();
             USBSerial_write(BACKSPACE);
             USBSerial_flush();
             tib[--pos] = 0; // obliterate
         }
         if (pos == 0) {
             USBSerial_write(BACKSPACE);
-            USBSerial_flush();
             USBSerial_write(' ');
-            USBSerial_flush();
             USBSerial_write(BACKSPACE);
-            USBSerial_flush();
             USBSerial_print(" ahua!");
             USBSerial_flush();
             ahua_flg = 1;
@@ -701,18 +663,8 @@ void runword() {
         ok();
         return;
     }
-    const uint8_t switchedOn = 0;
     if (isNumber()) {
         int nbr = number();
-
-        if (switchedOn) {
-            USBSerial_print(" hex: ");
-            USBSerial_print(nbr, HEX);
-            USBSerial_print("  <-- number, HEX");
-            USBSerial_println("");
-            USBSerial_flush();
-        }
-
         push(nbr);
         ok();
         return;
@@ -721,24 +673,15 @@ void runword() {
 }
 
 void setupInterpreter() {
-    delay(800);
-    delay(800);
-    delay(800);
-    delay(800);
+    delay(2700);
     USBSerial_println("");
-    USBSerial_flush();
     USBSerial_println(signature);
     USBSerial_println("");
-    USBSerial_flush();
-    USBSerial_println(" kansas nb Forth-like interpreter:");
+    USBSerial_println(" tucumcari nm Forth-like interpreter:");
     USBSerial_flush();
     words();
     USBSerial_println("");
     USBSerial_flush();
-
-    for (int offset = (0x11C0 + 0xB); offset > 0; offset--) {
-        jaddr--; // re-align
-    }
 }
 
 void Interpreter() {
@@ -749,6 +692,7 @@ void Interpreter() {
 
 /**
  *
+ * Tue  2 Jul 03:51:58 UTC 2024
  * Sun 30 Jun 03:45:04 UTC 2024
  * Sat 29 Jun 17:35:18 UTC 2024
  * Fri 28 Jun 16:46:02 UTC 2024
