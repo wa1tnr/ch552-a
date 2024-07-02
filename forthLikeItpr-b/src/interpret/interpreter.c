@@ -101,6 +101,13 @@ void back() {
         drop();
 }
 
+NAMED(_clear, "clr");
+void clrstack() {
+    for (uint8_t count = 8; count > 0; count--) {
+        push(0);
+    }
+}
+
 /* copy top of stack */
 NAMED(_dup, "dup");
 void dup() { push(TOS); }
@@ -292,7 +299,17 @@ void dumpRAM() {
     char buffer[5] = "";
     char *ram;
 
-    ram = (char *)ORG_ptr;
+    const uint8_t xdataP = 1;
+
+    ram = 0;
+
+    if (!xdataP) {
+        ram = (char *)ORG_ptr;
+    }
+
+    if (xdataP) {
+        ram = (char *)ORG_XPtr;
+    }
 
     USBSerial_print("!");
     USBSerial_print(" 0x");
@@ -327,7 +344,15 @@ void dumpRAM() {
         USBSerial_print(c, HEX);
         USBSerial_write(' ');
     }
-    ram = (char *)ORG_ptr;
+
+    if (!xdataP) {
+        ram = (char *)ORG_ptr;
+    }
+
+    if (xdataP) {
+        ram = (char *)ORG_XPtr;
+    }
+
     USBSerial_print("   ");
     for (uint8_t i = 0; i < 16; i++) {
         buffer[0] = *ram++;
@@ -336,7 +361,9 @@ void dumpRAM() {
         buffer[1] = '\0';
         USBSerial_print(buffer);
     }
+
     for (int iter = 8; iter > 0; iter--) {
+        ORG_XPtr++;
         ORG_ptr++;
     }
 
@@ -370,7 +397,10 @@ void dumping() {
     USBSerial_flush();
 }
 
-void resetOrgPtr() { ORG_ptrBu = ORG_ptrBuBu; }
+void resetOrgPtr() {
+    ORG_ptrBu = ORG_ptrBuBu;
+    ORG_XPtrBu = ORG_XPtrBuBu;
+}
 
 /* dump 256 bytes of RAM */
 NAMED(_dumpr, "dump");
@@ -389,51 +419,34 @@ void rdumps() {
 
     uint8_t isOffset = (ORGOffset > 0);
 
+// int *ORG_XPtr       = &ORGXdata; // unknown okay
+
     if (isOffset) {
         resetOrgPtr();
-        ORG_ptr = ORG_ptrBu;
-        ORG_ptr = ORG_ptr + (ORGOffset / 2);
+        ORG_ptr   = ORG_ptrBu;
+        ORG_ptr   = ORG_ptr + (ORGOffset / 2);
         ORG_ptrBu = ORG_ptrBu + 128;
+
+        ORG_XPtr  = ORG_XPtrBu;
+        ORG_XPtr  = ORG_XPtr + (ORGOffset / 2); // assume same case as above
+        ORG_XPtrBu = ORG_XPtrBu + 128;
     }
 
     ORG_ptr++;
     ORG_ptr--; // align
 
+    ORG_XPtr++;
+    ORG_XPtr--;
+
     /*
-     *
      *            pointer alignment in flashROM memory
      *
      * The alignment consequences are:
      *
      *     '1  dump'  dumps from  0x0000   .. but
      *     '2  dump'  dumps from  0x0002   .. and that
-     *
-     *     '1  dump'  does not
-     *                dump  from  0x0001   .. as expected.
-     *
-     * The pointer dodge intends to keep memory aligned, based
-     * on experimental evidence.  It was decided to use ptr++
-     * syntax to do that.
-     *
-     * Entirely unrearched here as to appropriateness.
-     *
-     * This comment was made with no testing as to just where
-     * it applies (best) in the program.
-     *
      */
     dumping();
-
-#if 0
-    int iterations = 1;
-    int popped = pop();
-    if (popped > 0) {
-        iterations = popped; // override unless zero
-    }
-    // everybody:
-    for (int count = iterations; count > 0; count--) {
-        dumping();
-    }
-#endif
 }
 
 /* End of Forth interpreter words */
@@ -462,6 +475,7 @@ const entry dictionary[] = {
     {_nopp, nopp},
     {_nop, nop},       {_words, words},   {_dup, dup},
     {_drop, drop},     {_back, back},     {_swap, swap},
+    {_clear, clrstack},
     {_over, over},     {_add, add},       {_multply, multply},
     {_and, and_},
     {_or, or_},        {_xor, xor_},      {_invert, invert},
