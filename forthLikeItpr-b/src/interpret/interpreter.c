@@ -19,23 +19,23 @@ uint8_t slowerThan = 0;
 __code int j = 0x7e;
 
 // cannot do anything here - likely is boot area:
-__code __at(0x0) char  ORG;
+__code __at(0x0) char ORG;
 
-int *ORG_ptr        = &ORG; // okay for reading only
-int *ORG_ptrBu      = &ORG;
-int *ORG_ptrBuBu    = &ORG;
+int *ORG_ptr = &ORG; // okay for reading only
+int *ORG_ptrBu = &ORG;
+int *ORG_ptrBuBu = &ORG;
 
 // xdata is abt 1 kb
 // data is abt 128 bytes perhaps - check datasheet and reexamine dump
 __data __at(0x0) char k;
 __data __at(0x0) char ORGXdata;
-int *ORG_XPtr       = &ORGXdata; // unknown okay
-int *ORG_XPtrBu     = &ORGXdata;
-int *ORG_XPtrBuBu   = &ORGXdata;
+int *ORG_XPtr = &ORGXdata; // unknown okay
+int *ORG_XPtrBu = &ORGXdata;
+int *ORG_XPtrBuBu = &ORGXdata;
 
-int *ORG_kaddrPtr      = &k;
-int *ORG_kaddrPtrBu    = &k;
-int *ORG_kaddrPtrBuBu  = &k;
+int *ORG_kaddrPtr = &k;
+int *ORG_kaddrPtrBu = &k;
+int *ORG_kaddrPtrBuBu = &k;
 
 int *kaddr = &k;
 
@@ -106,7 +106,7 @@ void back() {
 }
 
 NAMED(_clear, "clr");
-void clrstack() {
+void clrstk() {
     for (uint8_t count = 8; count > 0; count--) {
         push(0);
     }
@@ -147,8 +147,8 @@ void add() {
 }
 
 /* multiply top two items */
-NAMED(_multply, "*");
-void multply() {
+NAMED(_mult, "*");
+void mult() {
     int a = pop();
     TOS = a * TOS;
 }
@@ -218,7 +218,7 @@ void dotS() {
 
 /* delay TOS # of milliseconds */
 NAMED(_delay, "delay");
-void del() {delay(pop()); }
+void del() { delay(pop()); }
 
 /* Toggle pin at TOS and delay(spd), repeat... */
 NAMED(_wiggle, "wiggle");
@@ -259,8 +259,8 @@ void output() { /* pinMode(pop(), OUTPUT); */
 }
 
 /* make TOS pin an input with weak pullup */
-NAMED(_input_pullup, "input_pullup");
-void input_pullup() { /* pinMode(pop(), INPUT_PULLUP); */
+NAMED(_inpull, "inpull");
+void inpull() { /* pinMode(pop(), INPUT_PULLUP); */
 }
 
 void printZeds(int pvr) {
@@ -388,8 +388,8 @@ void dumping() {
 }
 
 void resetOrgPtr() {
-    ORG_ptrBu      = ORG_ptrBuBu;
-    ORG_XPtrBu     = ORG_XPtrBuBu;
+    ORG_ptrBu = ORG_ptrBuBu;
+    ORG_XPtrBu = ORG_XPtrBuBu;
     ORG_kaddrPtrBu = ORG_kaddrPtrBuBu;
 }
 
@@ -412,12 +412,12 @@ void rdumps() {
 
     if (isOffset) {
         resetOrgPtr();
-        ORG_ptr   = ORG_ptrBu;
-        ORG_ptr   = ORG_ptr + (ORGOffset / 2);
+        ORG_ptr = ORG_ptrBu;
+        ORG_ptr = ORG_ptr + (ORGOffset / 2);
         ORG_ptrBu = ORG_ptrBu + 128;
 
-        ORG_XPtr  = ORG_XPtrBu;
-        ORG_XPtr  = ORG_XPtr + (ORGOffset / 2); // assume same case as above
+        ORG_XPtr = ORG_XPtrBu;
+        ORG_XPtr = ORG_XPtr + (ORGOffset / 2); // assume same case as above
         ORG_XPtrBu = ORG_XPtrBu + 128;
 
         ORG_kaddrPtr = ORG_kaddrPtrBu;
@@ -433,7 +433,6 @@ void rdumps() {
 
     ORG_kaddrPtr++;
     ORG_kaddrPtr--;
-
 
     /*
      *            pointer alignment in flashROM memory
@@ -466,22 +465,20 @@ void nop() {}
 NAMED(_words, "words");
 void words();
 
-// clang-format off
 /* table of names and function addresses in flash */
+// clang-format off
 const entry dictionary[] = {
-    {_nopp, nopp},
-    {_nop, nop},       {_words, words},   {_dup, dup},
-    {_drop, drop},     {_back, back},     {_swap, swap},
-    {_clear, clrstack},
-    {_over, over},     {_add, add},       {_multply, multply},
-    {_and, and_},
-    {_or, or_},        {_xor, xor_},      {_invert, invert},
-    {_negate, negate}, {_dotS, dotS},     {_dotShex, dotShex},
-    {_base, base},
-    {_dot, dot},       {_dotHEX, dotHEX}, {_delay, del},
-    {_high, high},     {_low, low},       {_in, in},
-    {_input, input},   {_output, output}, {_input_pullup, input_pullup},
-    {_wiggle, wiggle}, {_dumpr, rdumps},  {_speed, speed}};
+    {_nopp, nopp},      {_nop, nop},         {_words, words},
+    {_dup, dup},        {_drop, drop},       {_back, back},
+    {_swap, swap},      {_clear, clrstk},    {_over, over},
+    {_add, add},        {_mult, mult},       {_and, and_},
+    {_or, or_},         {_xor, xor_},        {_invert, invert},
+    {_negate, negate},  {_dotS, dotS},       {_dotShex, dotShex},
+    {_base, base},      {_dot, dot},         {_dotHEX, dotHEX},
+    {_delay, del},      {_high, high},       {_low, low},
+    {_in, in},          {_input, input},     {_output, output},
+    {_inpull, inpull},  {_wiggle, wiggle},   {_dumpr, rdumps},
+    {_speed, speed}};
 // clang-format on
 
 /* Number of words in the dictionary */
@@ -685,23 +682,20 @@ void setupInterpreter() {
 }
 
 void Interpreter() {
-    USBSerial_flush();
     readword();
     runword();
 }
 
 /**
  *
- * Tue  2 Jul 03:51:58 UTC 2024
+ * Wed  3 Jul 14:29:46 UTC 2024
+ * Tue  2 Jul 15:02:55 UTC 2024
  * Sun 30 Jun 03:45:04 UTC 2024
  * Sat 29 Jun 17:35:18 UTC 2024
  * Fri 28 Jun 16:46:02 UTC 2024
  * Thu 27 Jun 22:18:40 UTC 2024
  * Sun 23 Jun 11:30:54 UTC 2024
  *
- *
  */
-
-// quite good.
 
 /* end. */

@@ -1,4 +1,5 @@
-/* Mon  1 Jul 18:11:33 UTC 2024 */
+/* Wed  3 Jul 14:29:46 UTC 2024 */
+
 /* Shattuck's Forth-like interpreter */
 
 /*
@@ -11,25 +12,9 @@
  *    Thank you.
  */
 
-/* TODO: remove ard_delay not needed */
-void ard_delay(int ms) { delay(ms); }
-
-void slowerE() {
-    for (int p = 250; p > 0; p--) {
-        ;
-    }
-}
-
-void slowerD() {
-    for (int p = 250; p > 0; p--) {
-        slowerE();
-    }
-}
-
 void slowerC() {
     for (int p = 25; p > 0; p--) {
         ;
-        /* slowerD(); */
     }
 }
 
